@@ -1,23 +1,33 @@
 package handler
 
 import (
+	"context"
 	"net/http"
 	"time"
 
 	"todoflow/internal/apierr"
 	"todoflow/internal/model"
-	"todoflow/internal/repo"
 
 	"github.com/google/uuid"
 )
 
 const dateLayout = "2006-01-02"
 
-type TaskHandler struct {
-	repo *repo.TaskRepo
+type taskRepository interface {
+	List(ctx context.Context, userID uuid.UUID, f model.TaskFilter) (*model.TaskListResult, error)
+	ListCalendarRange(ctx context.Context, userID uuid.UUID, from, to string, f model.TaskCalendarFilter) ([]model.Task, error)
+	GetByID(ctx context.Context, userID, id uuid.UUID) (*model.Task, error)
+	Create(ctx context.Context, userID uuid.UUID, in model.TaskInput) (*model.Task, error)
+	Update(ctx context.Context, userID uuid.UUID, id uuid.UUID, in model.TaskUpdate) (*model.Task, error)
+	UpdatePosition(ctx context.Context, userID uuid.UUID, id uuid.UUID, in model.PositionUpdate) (*model.Task, error)
+	Delete(ctx context.Context, userID, id uuid.UUID) error
 }
 
-func NewTaskHandler(r *repo.TaskRepo) *TaskHandler {
+type TaskHandler struct {
+	repo taskRepository
+}
+
+func NewTaskHandler(r taskRepository) *TaskHandler {
 	return &TaskHandler{repo: r}
 }
 
