@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"time"
 
 	"todoflow/internal/apierr"
 	"todoflow/internal/model"
@@ -97,6 +98,41 @@ func (h *TaskHandler) Create(w http.ResponseWriter, r *http.Request) {
 		apierr.Write(w, apierr.Validation("title", "required"))
 		return
 	}
+	if len(in.Title) > 500 {
+		apierr.Write(w, apierr.Validation("title", "maxLength is 500"))
+		return
+	}
+
+	if in.DueDate != nil {
+		// The DB column is DATE, so accept only YYYY-MM-DD to avoid 500s from SQL.
+		if *in.DueDate == "" {
+			apierr.Write(w, apierr.Validation("due_date", "must be a valid date (YYYY-MM-DD)"))
+			return
+		}
+		if _, err := time.Parse("2006-01-02", *in.DueDate); err != nil {
+			apierr.Write(w, apierr.Validation("due_date", "must be a valid date (YYYY-MM-DD)"))
+			return
+		}
+	}
+
+	if in.Priority != nil {
+		switch *in.Priority {
+		case "urgent", "high", "medium", "low":
+		default:
+			apierr.Write(w, apierr.Validation("priority", "must be one of: urgent, high, medium, low"))
+			return
+		}
+	}
+
+	if in.Status != nil {
+		switch *in.Status {
+		case "todo", "in_progress", "done":
+		default:
+			apierr.Write(w, apierr.Validation("status", "must be one of: todo, in_progress, done"))
+			return
+		}
+	}
+
 	t, err := h.repo.Create(r.Context(), userID(r), in)
 	if err != nil {
 		apierr.Write(w, apierr.Internal("failed to create task"))
