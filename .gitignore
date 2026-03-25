@@ -11,6 +11,10 @@ state.json
 CLAUDE.md
 mail/
 
+# Frontend
+web/node_modules/
+web/dist/
+
 # Go
 /server
 *.exe

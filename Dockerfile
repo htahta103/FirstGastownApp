@@ -1,3 +1,10 @@
+FROM node:20-alpine AS frontend
+WORKDIR /web
+COPY web/package.json web/package-lock.json ./
+RUN npm ci
+COPY web/ ./
+RUN npm run build
+
 FROM golang:1.22-alpine AS builder
 
 WORKDIR /app
@@ -11,5 +18,7 @@ RUN apk --no-cache add ca-certificates
 WORKDIR /app
 COPY --from=builder /server .
 COPY migrations/ ./migrations/
+COPY --from=frontend /web/dist ./static/
 EXPOSE 8080
+ENV STATIC_DIR=/app/static
 CMD ["./server"]
