@@ -1,27 +1,66 @@
-interface EmptyStateProps {
+import type { ReactNode } from 'react'
+import { motion } from 'framer-motion'
+import { Button } from './Button'
+
+export interface EmptyStateProps {
   title: string
   description?: string
-  icon?: string
+  /** Emoji string, inline SVG, or icon component */
+  icon?: ReactNode
   action?: { label: string; onClick: () => void }
 }
 
-export function EmptyState({ title, description, icon = '📋', action }: EmptyStateProps) {
+const defaultIcon = (
+  <svg className="size-12 text-violet-400/80" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={1.25}
+      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+    />
+  </svg>
+)
+
+export function EmptyState({
+  title,
+  description,
+  icon = defaultIcon,
+  action,
+}: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
-      <span className="text-5xl mb-4">{icon}</span>
-      <h3 className="text-lg font-semibold text-gray-300">{title}</h3>
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ type: 'spring', stiffness: 320, damping: 28 }}
+      className="flex flex-col items-center justify-center px-6 py-20 text-center"
+    >
+      <div className="relative mb-6 flex size-24 items-center justify-center">
+        <div
+          className="absolute inset-0 rounded-3xl bg-gradient-to-br from-violet-500/20 via-fuchsia-500/10 to-transparent blur-xl"
+          aria-hidden
+        />
+        <div
+          className="relative flex size-20 items-center justify-center rounded-2xl border border-white/[0.1]
+            bg-white/[0.04] shadow-lg shadow-violet-500/10 backdrop-blur-md"
+        >
+          {typeof icon === 'string' ? (
+            <span className="text-4xl" role="img" aria-hidden>
+              {icon}
+            </span>
+          ) : (
+            icon
+          )}
+        </div>
+      </div>
+      <h3 className="text-lg font-semibold tracking-tight text-gray-100">{title}</h3>
       {description && (
-        <p className="mt-1 text-sm text-gray-500 max-w-md">{description}</p>
+        <p className="mt-2 max-w-sm text-sm leading-relaxed text-gray-500">{description}</p>
       )}
       {action && (
-        <button
-          onClick={action.onClick}
-          className="mt-4 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white
-            hover:bg-blue-500 transition-colors"
-        >
+        <Button variant="primary" size="md" className="mt-8" onClick={action.onClick}>
           {action.label}
-        </button>
+        </Button>
       )}
-    </div>
+    </motion.div>
   )
 }

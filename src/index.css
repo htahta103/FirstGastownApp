@@ -1,3 +1,44 @@
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+/* Premium dark surface tokens */
+:root.dark,
+.dark {
+  --ui-glass-bg: rgb(255 255 255 / 0.04);
+  --ui-glass-border: rgb(255 255 255 / 0.08);
+  --ui-glass-highlight: rgb(255 255 255 / 0.06);
+  --ui-accent: rgb(167 139 250);
+  --ui-accent-dim: rgb(139 92 246);
+  --ui-ring: rgb(167 139 250 / 0.35);
+}
+
+@keyframes ui-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.ui-skeleton-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.ui-skeleton-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(255 255 255 / 0.06),
+    transparent
+  );
+  animation: ui-shimmer 1.4s ease-in-out infinite;
+}

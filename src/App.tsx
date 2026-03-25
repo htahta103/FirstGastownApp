@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { useUIStore } from './stores/uiStore'
 import { ensureUser } from './api/client'
 import { Layout } from './components/layout/Layout'
+import { ToastContainer } from './components/ui'
 import { DashboardPage } from './pages/DashboardPage'
 import { TasksPage } from './pages/TasksPage'
 import { ProjectPage } from './pages/ProjectPage'
@@ -27,6 +28,7 @@ function AppContent() {
 
   return (
     <Layout>
+      <ToastContainer />
       <Routes>
         <Route path="/" element={<DashboardPage />} />
         <Route path="/tasks" element={<TasksPage />} />
