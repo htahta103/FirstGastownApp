@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"embed"
+	"io/fs"
 	"log/slog"
 	"net/http"
 	"os"
@@ -23,6 +25,9 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
+
+//go:embed web/*
+var webAssets embed.FS
 
 func main() {
 	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)))
@@ -194,5 +199,22 @@ func newRouter(cfg *config.Config, pool *pgxpool.Pool) http.Handler {
 		})
 	})
 
+	mountWebUI(r)
 	return r
+}
+
+func mountWebUI(r chi.Router) {
+	sub, err := fs.Sub(webAssets, "web")
+	if err != nil {
+		panic(err)
+	}
+	serve := func(name string) http.HandlerFunc {
+		return func(w http.ResponseWriter, req *http.Request) {
+			http.ServeFileFS(w, req, sub, name)
+		}
+	}
+	r.Get("/", serve("index.html"))
+	r.Get("/index.html", serve("index.html"))
+	r.Get("/styles.css", serve("styles.css"))
+	r.Get("/app.js", serve("app.js"))
 }
