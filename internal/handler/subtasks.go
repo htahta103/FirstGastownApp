@@ -6,14 +6,21 @@ import (
 	"todoflow/internal/apierr"
 	"todoflow/internal/model"
 	"todoflow/internal/repo"
+
+	"github.com/google/uuid"
 )
 
 type SubtaskHandler struct {
-	repo *repo.SubtaskRepo
+	subtasks *repo.SubtaskRepo
+	tasks    *repo.TaskRepo
 }
 
-func NewSubtaskHandler(r *repo.SubtaskRepo) *SubtaskHandler {
-	return &SubtaskHandler{repo: r}
+func NewSubtaskHandler(sub *repo.SubtaskRepo, tasks *repo.TaskRepo) *SubtaskHandler {
+	return &SubtaskHandler{subtasks: sub, tasks: tasks}
+}
+
+func (h *SubtaskHandler) syncParent(r *http.Request, taskID uuid.UUID) {
+	_ = h.tasks.SyncStatusWithSubtasks(r.Context(), userID(r), taskID)
 }
 
 func (h *SubtaskHandler) List(w http.ResponseWriter, r *http.Request) {
@@ -22,7 +29,16 @@ func (h *SubtaskHandler) List(w http.ResponseWriter, r *http.Request) {
 		apierr.Write(w, appErr)
 		return
 	}
-	subtasks, err := h.repo.ListByTask(r.Context(), userID(r), taskID)
+	ok, err := h.tasks.ExistsForUser(r.Context(), userID(r), taskID)
+	if err != nil {
+		apierr.Write(w, apierr.Internal("failed to verify task"))
+		return
+	}
+	if !ok {
+		apierr.Write(w, apierr.NotFound("task"))
+		return
+	}
+	subtasks, err := h.subtasks.ListByTask(r.Context(), userID(r), taskID)
 	if err != nil {
 		apierr.Write(w, apierr.Internal("failed to list subtasks"))
 		return
@@ -45,11 +61,21 @@ func (h *SubtaskHandler) Create(w http.ResponseWriter, r *http.Request) {
 		apierr.Write(w, apierr.Validation("title", "required"))
 		return
 	}
-	s, err := h.repo.Create(r.Context(), userID(r), taskID, in)
+	ok, err := h.tasks.ExistsForUser(r.Context(), userID(r), taskID)
+	if err != nil {
+		apierr.Write(w, apierr.Internal("failed to verify task"))
+		return
+	}
+	if !ok {
+		apierr.Write(w, apierr.NotFound("task"))
+		return
+	}
+	s, err := h.subtasks.Create(r.Context(), userID(r), taskID, in)
 	if err != nil {
 		apierr.Write(w, apierr.Internal("failed to create subtask"))
 		return
 	}
+	h.syncParent(r, taskID)
 	writeJSON(w, http.StatusCreated, s)
 }
 
@@ -68,7 +94,7 @@ func (h *SubtaskHandler) Update(w http.ResponseWriter, r *http.Request) {
 		apierr.Write(w, apierr.Validation("title", "required"))
 		return
 	}
-	s, err := h.repo.Update(r.Context(), userID(r), id, in)
+	s, err := h.subtasks.Update(r.Context(), userID(r), id, in)
 	if err != nil {
 		apierr.Write(w, apierr.Internal("failed to update subtask"))
 		return
@@ -86,7 +112,7 @@ func (h *SubtaskHandler) Toggle(w http.ResponseWriter, r *http.Request) {
 		apierr.Write(w, appErr)
 		return
 	}
-	s, err := h.repo.Toggle(r.Context(), userID(r), id)
+	s, err := h.subtasks.Toggle(r.Context(), userID(r), id)
 	if err != nil {
 		apierr.Write(w, apierr.Internal("failed to toggle subtask"))
 		return
@@ -95,6 +121,7 @@ func (h *SubtaskHandler) Toggle(w http.ResponseWriter, r *http.Request) {
 		apierr.Write(w, apierr.NotFound("subtask"))
 		return
 	}
+	h.syncParent(r, s.TaskID)
 	writeJSON(w, http.StatusOK, s)
 }
 
@@ -104,9 +131,15 @@ func (h *SubtaskHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		apierr.Write(w, appErr)
 		return
 	}
-	if err := h.repo.Delete(r.Context(), userID(r), id); err != nil {
+	taskID, err := h.subtasks.Delete(r.Context(), userID(r), id)
+	if err != nil {
 		apierr.Write(w, apierr.Internal("failed to delete subtask"))
 		return
 	}
+	if taskID == uuid.Nil {
+		apierr.Write(w, apierr.NotFound("subtask"))
+		return
+	}
+	h.syncParent(r, taskID)
 	w.WriteHeader(http.StatusNoContent)
 }

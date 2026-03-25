@@ -385,7 +385,10 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Task" }
 
-  # --- Subtasks ---
+  # --- Subtasks (one level under a task; no nesting) ---
+  # After create, toggle, or delete, parent task status syncs: if all subtasks are
+  # completed the parent becomes done; if any subtask is incomplete and the parent
+  # was done, the parent becomes in_progress.
   /tasks/{taskId}/subtasks:
     parameters:
       - name: taskId

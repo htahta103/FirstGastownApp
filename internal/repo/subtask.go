@@ -96,8 +96,14 @@ func (r *SubtaskRepo) Toggle(ctx context.Context, userID, id uuid.UUID) (*model.
 	return &s, err
 }
 
-func (r *SubtaskRepo) Delete(ctx context.Context, userID, id uuid.UUID) error {
-	_, err := r.pool.Exec(ctx,
-		`DELETE FROM subtasks WHERE id = $1 AND user_id = $2`, id, userID)
-	return err
+// Delete removes a subtask and returns its task_id, or uuid.Nil if no row was deleted.
+func (r *SubtaskRepo) Delete(ctx context.Context, userID, id uuid.UUID) (taskID uuid.UUID, err error) {
+	err = r.pool.QueryRow(ctx,
+		`DELETE FROM subtasks WHERE id = $1 AND user_id = $2 RETURNING task_id`,
+		id, userID,
+	).Scan(&taskID)
+	if err == pgx.ErrNoRows {
+		return uuid.Nil, nil
+	}
+	return taskID, err
 }

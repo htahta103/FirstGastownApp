@@ -303,6 +303,53 @@ func (r *TaskRepo) Delete(ctx context.Context, userID, id uuid.UUID) error {
 	return err
 }
 
+// ExistsForUser reports whether a task belongs to the given user.
+func (r *TaskRepo) ExistsForUser(ctx context.Context, userID, taskID uuid.UUID) (bool, error) {
+	var one int
+	err := r.pool.QueryRow(ctx,
+		`SELECT 1 FROM tasks WHERE id = $1 AND user_id = $2`,
+		taskID, userID,
+	).Scan(&one)
+	if err == pgx.ErrNoRows {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+// SyncStatusWithSubtasks sets parent task status from subtask completion:
+// - If the task has subtasks and all are completed, status becomes done.
+// - If any subtask is incomplete and status was done, status becomes in_progress.
+// - Tasks with no subtasks are unchanged.
+func (r *TaskRepo) SyncStatusWithSubtasks(ctx context.Context, userID, taskID uuid.UUID) error {
+	var total, completed int
+	err := r.pool.QueryRow(ctx,
+		`SELECT COUNT(*)::int, COUNT(*) FILTER (WHERE completed)::int
+		 FROM subtasks WHERE task_id = $1 AND user_id = $2`,
+		taskID, userID,
+	).Scan(&total, &completed)
+	if err != nil {
+		return err
+	}
+	if total == 0 {
+		return nil
+	}
+	if completed == total {
+		_, err := r.pool.Exec(ctx,
+			`UPDATE tasks SET status = 'done' WHERE id = $1 AND user_id = $2`,
+			taskID, userID,
+		)
+		return err
+	}
+	_, err = r.pool.Exec(ctx,
+		`UPDATE tasks SET status = 'in_progress' WHERE id = $1 AND user_id = $2 AND status = 'done'`,
+		taskID, userID,
+	)
+	return err
+}
+
 func (r *TaskRepo) loadSubtaskCounts(ctx context.Context, taskMap map[uuid.UUID]*model.Task, ids []uuid.UUID) error {
 	rows, err := r.pool.Query(ctx,
 		`SELECT task_id,
