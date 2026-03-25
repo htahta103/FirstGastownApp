@@ -1,6 +1,10 @@
-web/node_modules
-web/dist
 .git
+.github
 .runtime
 .beads
 .cursor
+web/node_modules
+web/dist
+**/.DS_Store
+.env
+.env.*

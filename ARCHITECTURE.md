@@ -221,9 +221,9 @@ migrations/
 
 ```yaml
 services:
-  db:        # postgres:16-alpine, port 5432, volume for data
-  api:       # Go binary, port 8080, depends_on db
-  frontend:  # Node dev server (Vite), port 5173, proxies /api to api:8080
+  db:   # postgres:16-alpine, port 5432, volume for data
+  api:  # Go binary, port 8080, depends_on db
+  web:  # Node dev server (Vite), port 5173; local dev may proxy /api to api:8080
 ```
 
 ### Production (Single VPS)
@@ -246,3 +246,20 @@ services:
 - **CI/CD**: GitHub Actions builds Docker images, pushes to registry, SSH-deploys to VPS.
 - **Database backups**: pg_dump cron to object storage (daily).
 - **Monitoring**: Structured JSON logging from Go. Optional Prometheus metrics endpoint.
+
+## 8. Repository layout (this repo)
+
+Monorepo paths and tooling:
+
+| Path | Purpose |
+|------|---------|
+| `cmd/server`, `internal/`, `migrations/` | Go API (matches §6; evolve toward full handler/service/repo split) |
+| `web/` | React + TypeScript (Vite) SPA |
+| `Dockerfile` | Multi-stage: build Vite assets from `web/`, compile Go API, embed static at `/app/static` (`STATIC_DIR`) |
+| `web/Dockerfile` | Vite dev server for Compose |
+| `docker-compose.yml` | Local `db` + `api` + `web` |
+| `Makefile` | `build`, `test`, `lint`, `typecheck`, `dev`, deploy placeholders |
+| `.github/workflows/ci.yml` | CI: Go build/vet/test; npm lint/typecheck/build/test |
+| `.env.example` | Required env vars and secret *names* (no real secrets) |
+
+`web/go.mod` is a minimal nested Go module so `go test ./...` at the repo root does not pick up `.go` sources inside `web/node_modules/`.
