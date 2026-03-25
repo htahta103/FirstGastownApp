@@ -1,3 +1,6 @@
+# All-in-one image: API + Vite static (no Nginx). For split production (nginx + api), use
+# deploy/docker/Dockerfile.api, deploy/docker/Dockerfile.nginx, and docker-compose.prod.yml.
+
 FROM node:20-alpine AS frontend
 WORKDIR /web
 COPY web/package.json web/package-lock.json ./

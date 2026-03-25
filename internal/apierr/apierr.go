@@ -23,7 +23,7 @@ type errorEnvelope struct {
 func Write(w http.ResponseWriter, err *AppError) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(err.HTTPStatus)
-	json.NewEncoder(w).Encode(errorEnvelope{Error: err})
+	_ = json.NewEncoder(w).Encode(errorEnvelope{Error: err})
 }
 
 func NotFound(entity string) *AppError {

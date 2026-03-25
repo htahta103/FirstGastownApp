@@ -1,5 +1,5 @@
-import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { defineConfig } from "vitest/config";
 
 // In Docker Compose, set API_PROXY_TARGET=http://api:8080 so the Vite server proxies to the API container.
 const apiProxyTarget =
@@ -15,5 +15,9 @@ export default defineConfig({
         changeOrigin: true,
       },
     },
+  },
+  test: {
+    environment: "node",
+    include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
   },
 });

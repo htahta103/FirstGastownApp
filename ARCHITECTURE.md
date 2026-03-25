@@ -258,6 +258,9 @@ Monorepo paths and tooling:
 | `Dockerfile` | Multi-stage: build Vite assets from `web/`, compile Go API, embed static at `/app/static` (`STATIC_DIR`) |
 | `web/Dockerfile` | Vite dev server for Compose |
 | `docker-compose.yml` | Local dev on network `todoflow_dev`: Postgres 16, API with **air** (`Dockerfile.dev`), Vite with `/api` → `api:8080` |
+| `docker-compose.prod.yml` | Prod-style: Postgres + API (`deploy/docker/Dockerfile.api`) + Nginx (`deploy/docker/Dockerfile.nginx`), network `todoflow_prod` |
+| `deploy/postgres/postgresql.conf` | Tuned defaults mounted into the prod Postgres service |
+| `.golangci.yml` | golangci-lint v2 config (used in CI and optional locally) |
 | `Makefile` | `build`, `test`, `lint`, `typecheck`, `dev`, deploy placeholders |
 | `.github/workflows/ci.yml` | CI: Go build/vet/test; npm lint/typecheck/build/test |
 | `.env.example` | Required env vars and secret *names* (no real secrets) |

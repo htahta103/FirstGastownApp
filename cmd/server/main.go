@@ -141,7 +141,7 @@ func newRouter(cfg *config.Config, pool *pgxpool.Pool) http.Handler {
 
 	r.Get("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"status":"ok"}`))
+		_, _ = w.Write([]byte(`{"status":"ok"}`))
 	})
 
 	r.Route("/api", func(api chi.Router) {
@@ -228,7 +228,7 @@ func newRouter(cfg *config.Config, pool *pgxpool.Pool) http.Handler {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-			defer f.Close()
+			defer func() { _ = f.Close() }()
 			fi, err := f.Stat()
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)

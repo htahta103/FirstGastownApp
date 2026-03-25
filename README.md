@@ -43,6 +43,21 @@ npm run dev
 
 The web dev server proxies `/api` to `http://localhost:8080` (see `web/vite.config.ts`).
 
+### Production-style stack (Nginx + API + Postgres)
+
+Split images: API only (`deploy/docker/Dockerfile.api`), Nginx with built SPA + `/api` reverse proxy (`deploy/docker/Dockerfile.nginx`), Postgres 16 with `deploy/postgres/postgresql.conf`. Network: **`todoflow_prod`**.
+
+```bash
+docker compose -f docker-compose.prod.yml up --build
+# or: make prod
+```
+
+- Browser: **http://localhost** (port **80** by default; override with `NGINX_PORT` in `.env`)
+- Images are also built in GitHub Actions and **pushed to GHCR** on pushes to `main`:  
+  `ghcr.io/<owner>/todoflow-api` and `ghcr.io/<owner>/todoflow-nginx` (owner lowercased).
+
+The root `Dockerfile` remains a **single-container** option (API + embedded static) for simpler hosts.
+
 ## Common Commands
 
 ```bash
@@ -50,7 +65,10 @@ make build
 make test
 make lint
 make dev
+make prod
 ```
+
+`make lint` uses **golangci-lint** when installed; otherwise it falls back to `go vet ./...`. CI always runs golangci-lint.
 
 ## Configuration
 

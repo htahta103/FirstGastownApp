@@ -1,4 +1,4 @@
-.PHONY: build test lint typecheck dev down
+.PHONY: build test lint typecheck dev down prod
 .PHONY: deploy-staging deploy-prod
 
 build:
@@ -10,8 +10,7 @@ test:
 	cd web && npm test --if-present
 
 lint:
-	# Go: minimal lint (keeps CI light); expand later with golangci-lint if desired.
-	go vet ./...
+	@if command -v golangci-lint >/dev/null 2>&1; then golangci-lint run ./...; else go vet ./...; fi
 	cd web && npm run lint
 
 typecheck:
@@ -22,6 +21,9 @@ dev:
 
 down:
 	docker compose down -v
+
+prod:
+	docker compose -f docker-compose.prod.yml up --build
 
 deploy-staging:
 	@echo "TODO: implement staging deploy (CI/CD + VPS/registry)"
