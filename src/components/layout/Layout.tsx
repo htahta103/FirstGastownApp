@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
+import { ProjectSidebarList } from './ProjectSidebarList'
 
 const navClass = ({ isActive }: { isActive: boolean }) =>
   `block rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
@@ -23,6 +24,7 @@ export function Layout({ children }: { children: ReactNode }) {
             Tasks
           </NavLink>
         </nav>
+        <ProjectSidebarList />
       </aside>
       <main className="min-w-0 flex-1 overflow-auto">{children}</main>
     </div>

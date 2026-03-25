@@ -8,6 +8,7 @@ import { ToastContainer } from './components/ui'
 import { DashboardPage } from './pages/DashboardPage'
 import { TasksPage } from './pages/TasksPage'
 import { ProjectPage } from './pages/ProjectPage'
+import { ProjectsPage } from './pages/ProjectsPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,6 +33,7 @@ function AppContent() {
       <Routes>
         <Route path="/" element={<DashboardPage />} />
         <Route path="/tasks" element={<TasksPage />} />
+        <Route path="/projects" element={<ProjectsPage />} />
         <Route path="/project/:projectId" element={<ProjectPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
