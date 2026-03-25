@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useEffect } from 'react'
+import { SearchModal } from './components/tasks/SearchModal'
 import { useUIStore } from './stores/uiStore'
 import { ensureUser } from './api/client'
 import { Layout } from './components/layout/Layout'
@@ -18,6 +19,8 @@ const queryClient = new QueryClient({
 
 function AppContent() {
   const theme = useUIStore((s) => s.theme)
+  const searchOpen = useUIStore((s) => s.searchOpen)
+  const setSearchOpen = useUIStore((s) => s.setSearchOpen)
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')
@@ -27,9 +30,22 @@ function AppContent() {
     ensureUser().catch(() => {})
   }, [])
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === '/') {
+        e.preventDefault()
+        const s = useUIStore.getState()
+        s.setSearchOpen(!s.searchOpen)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
   return (
     <Layout>
       <ToastContainer />
+      <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
       <Routes>
         <Route path="/" element={<DashboardPage />} />
         <Route path="/tasks" element={<TasksPage />} />

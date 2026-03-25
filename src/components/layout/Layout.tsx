@@ -2,6 +2,31 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useUIStore } from '../../stores/uiStore'
+
+function SearchTrigger({ className = '' }: { className?: string }) {
+  const setSearchOpen = useUIStore((s) => s.setSearchOpen)
+  return (
+    <button
+      type="button"
+      onClick={() => setSearchOpen(true)}
+      className={`rounded-xl border border-slate-200/90 bg-white/80 p-2.5 text-slate-600 shadow-sm backdrop-blur-md transition-colors
+        hover:bg-white hover:text-violet-700
+        dark:border-white/[0.1] dark:bg-white/[0.06] dark:text-gray-300 dark:shadow-none dark:hover:bg-white/[0.1] dark:hover:text-violet-200
+        ${className}`}
+      aria-label="Search tasks"
+      title="Search (⌘/)"
+    >
+      <svg className="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={1.75}
+          d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+        />
+      </svg>
+    </button>
+  )
+}
 import { ProjectSidebarList } from './ProjectSidebarList'
 
 function useMediaQuery(query: string) {
@@ -100,6 +125,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <h1 className="min-w-0 flex-1 truncate bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-lg font-bold text-transparent dark:from-violet-400 dark:to-fuchsia-400">
           TodoFlow
         </h1>
+        <SearchTrigger />
         <ThemeToggle />
       </header>
 
@@ -133,7 +159,10 @@ export function Layout({ children }: { children: ReactNode }) {
             <h1 className="bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-xl font-bold text-transparent dark:from-violet-400 dark:to-fuchsia-400">
               TodoFlow
             </h1>
-            <ThemeToggle className="hidden lg:inline-flex" />
+            <div className="flex items-center gap-1.5">
+              <SearchTrigger />
+              <ThemeToggle className="hidden lg:inline-flex" />
+            </div>
           </div>
           <nav className="mt-2 flex flex-col gap-1 lg:mt-6">
             <NavLink to="/" end className={navClass} onClick={() => !isLg && setSidebarOpen(false)}>
