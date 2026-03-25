@@ -1,40 +1,64 @@
+# Local development: Postgres + Go API (air) + Vite dev server.
+# Copy .env.example to .env and adjust values as needed.
+
+networks:
+  default:
+    name: todoflow_dev
+    driver: bridge
+
 services:
   db:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: todoflow
-      POSTGRES_PASSWORD: todoflow
-      POSTGRES_DB: todoflow
+      POSTGRES_USER: ${POSTGRES_USER:-todoflow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-todoflow}
+      POSTGRES_DB: ${POSTGRES_DB:-todoflow}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U todoflow"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
       interval: 5s
       timeout: 5s
       retries: 5
 
   api:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
     ports:
-      - "8080:8080"
+      - "${API_PORT:-8080}:8080"
     environment:
-      DATABASE_URL: postgres://todoflow:todoflow@db:5432/todoflow?sslmode=disable
-      PORT: "8080"
-      CORS_ORIGIN: "*"
+      DATABASE_URL: ${DATABASE_URL:-postgres://todoflow:todoflow@db:5432/todoflow?sslmode=disable}
+      PORT: ${PORT:-8080}
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+    volumes:
+      - .:/app
+      - go-mod-cache:/go/pkg/mod
     depends_on:
       db:
         condition: service_healthy
 
   web:
-    build: ./web
+    image: node:20-alpine
+    working_dir: /app
     ports:
-      - "5173:5173"
+      - "${WEB_PORT:-5173}:5173"
     environment:
-      VITE_API_BASE_URL: "http://localhost:8080"
+      # Vite proxy target from inside the container (Docker DNS).
+      API_PROXY_TARGET: ${API_PROXY_TARGET:-http://api:8080}
+    volumes:
+      - ./web:/app
+      - web-node-modules:/app/node_modules
+    command:
+      - sh
+      - -c
+      - npm ci && npm run dev -- --host 0.0.0.0 --port 5173
     depends_on:
       - api
 
 volumes:
   pgdata:
+  go-mod-cache:
+  web-node-modules:

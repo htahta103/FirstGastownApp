@@ -1,0 +1,14 @@
+# Local development API: hot reload via air (see docker-compose.yml).
+FROM golang:1.25-alpine
+
+RUN apk add --no-cache git ca-certificates
+
+ENV CGO_ENABLED=0
+RUN go install github.com/air-verse/air@latest
+ENV PATH="${PATH}:/go/bin"
+
+WORKDIR /app
+
+EXPOSE 8080
+
+CMD ["air", "-c", ".air.toml"]
