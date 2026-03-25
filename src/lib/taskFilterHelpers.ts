@@ -88,6 +88,19 @@ export function filterStateToApi(s: TaskListFilterState): TaskFilter {
   })
 }
 
+/** Kanban: same as list filters except status (always all columns) and fixed sort/limit. */
+export function filterStateToBoardApi(s: TaskListFilterState): TaskFilter {
+  const range = duePresetToRange(s.duePreset, s.customRange)
+  return compactTaskFilter({
+    ...(s.project_id && { project_id: s.project_id }),
+    ...(s.priority && { priority: s.priority }),
+    ...(s.tag_id && { tag_id: s.tag_id }),
+    ...range,
+    sort: 'position',
+    limit: 500,
+  })
+}
+
 export function taskFilterToFilterState(f: TaskFilter): TaskListFilterState {
   const { preset, custom } = detectDuePreset(f)
   const sort = SORTS.includes(f.sort as TaskSort) ? (f.sort as TaskSort) : 'position'
