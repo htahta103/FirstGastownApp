@@ -1,0 +1,8 @@
+# Example crontab lines (adjust paths and user).
+# Install: crontab -e
+#
+# Daily database dump at 03:15 UTC
+15 3 * * * cd /opt/todoflow && BACKUP_DIR=/var/backups/todoflow RETENTION_DAYS=14 /opt/todoflow/deploy/scripts/backup-db.sh >>/var/log/todoflow-backup.log 2>&1
+#
+# Certbot renewal (usually already installed by certbot Debian/Ubuntu package)
+# 0 4 * * * certbot renew --quiet --deploy-hook /opt/todoflow/deploy/nginx/reload-hook.sh

@@ -1,0 +1,42 @@
+# Production stack: Postgres + API bound to loopback for host Nginx.
+# Usage (on server, from repo root):
+#   docker compose -f deploy/docker-compose.prod.yaml --env-file deploy/.env up -d --build
+#
+# Nginx on the host terminates TLS and proxies to 127.0.0.1:8080.
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-todoflow}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: ${API_IMAGE:-todoflow-api:local}
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      PORT: ${PORT:-8080}
+      CORS_ORIGIN: ${CORS_ORIGIN}
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
