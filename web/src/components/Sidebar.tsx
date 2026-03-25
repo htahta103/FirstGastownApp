@@ -33,7 +33,9 @@ export function Sidebar({
   const panel = (
     <div className="flex h-full flex-col border-surface-border bg-white/95 backdrop-blur-md dark:bg-surface-raised/95 md:border-r">
       <div className="flex items-center justify-between px-4 pb-2 pt-4 md:pt-5">
-        <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Navigate</span>
+        <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
+          Navigate
+        </span>
         <button
           type="button"
           className="rounded-lg p-1 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/10 md:hidden"
@@ -155,12 +157,7 @@ export function Sidebar({
 function PlusIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M12 5v14M5 12h14"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
+      <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }
@@ -168,12 +165,7 @@ function PlusIcon() {
 function CloseIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M18 6L6 18M6 6l12 12"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
+      <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }

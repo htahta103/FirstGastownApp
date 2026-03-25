@@ -6,6 +6,7 @@ import { PageContainer } from "./components/PageContainer";
 import { Sidebar } from "./components/Sidebar";
 import { TaskDetail } from "./components/TaskDetail";
 import { TaskForm } from "./components/TaskForm";
+import { CalendarView } from "./components/CalendarView";
 import { TaskRow } from "./components/TaskRow";
 import { TopBar } from "./components/TopBar";
 import type { NavMode, Project, SmartListFilter, Tag, Task, TaskStatus } from "./types";
@@ -64,7 +65,7 @@ export default function App() {
   const [creatingProject, setCreatingProject] = useState(false);
   const [newProjectName, setNewProjectName] = useState("Inbox");
 
-  const [viewMode, setViewMode] = useState<"list" | "board">("list");
+  const [viewMode, setViewMode] = useState<"list" | "board" | "calendar">("list");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -84,8 +85,7 @@ export default function App() {
     localStorage.setItem(THEME_KEY, isDark ? "dark" : "light");
   }, [isDark]);
 
-  const defaultProjectId =
-    nav.kind === "project" ? nav.projectId : (projects[0]?.id ?? "");
+  const defaultProjectId = nav.kind === "project" ? nav.projectId : (projects[0]?.id ?? "");
 
   const visibleTasks = useMemo(() => {
     if (nav.kind === "project") return rawTasks;
@@ -281,7 +281,9 @@ export default function App() {
     return (
       <div className="mx-auto flex min-h-screen max-w-lg flex-col justify-center gap-6 bg-zinc-50 px-4 dark:bg-surface">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">Welcome to TodoFlow</h1>
+          <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+            Welcome to TodoFlow
+          </h1>
           <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
             Create your first project to start adding tasks.
           </p>
@@ -367,7 +369,9 @@ export default function App() {
               )}
 
               <div className="space-y-2">
-                <h2 className="text-sm font-medium text-zinc-500 dark:text-zinc-400">{listHeading}</h2>
+                <h2 className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+                  {listHeading}
+                </h2>
 
                 {viewMode === "list" ? (
                   visibleTasks.length === 0 ? (
@@ -387,6 +391,20 @@ export default function App() {
                         />
                       ))}
                     </div>
+                  )
+                ) : viewMode === "calendar" ? (
+                  visibleTasks.length === 0 ? (
+                    <p className="rounded-xl border border-dashed border-surface-border bg-white/50 px-4 py-8 text-center text-sm text-zinc-500 dark:bg-surface-raised/30">
+                      {nav.kind === "smart"
+                        ? "No tasks match this smart list."
+                        : "No tasks yet. Create one with “New task”."}
+                    </p>
+                  ) : (
+                    <CalendarView
+                      tasks={visibleTasks}
+                      selectedId={selected?.id ?? null}
+                      onSelectTask={(task) => setSelected(task)}
+                    />
                   )
                 ) : (
                   <div className="grid grid-cols-1 gap-4 lg:grid-cols-3" aria-label="Board">
@@ -443,7 +461,9 @@ export default function App() {
                                 if (!before) {
                                   const next = card.nextElementSibling;
                                   insertBeforeId =
-                                    next instanceof HTMLElement ? (next.dataset.taskId ?? null) : null;
+                                    next instanceof HTMLElement
+                                      ? (next.dataset.taskId ?? null)
+                                      : null;
                                 }
                                 void applyDrop(targetStatus, insertBeforeId);
                               }}
@@ -535,7 +555,9 @@ export default function App() {
                         setSearchQuery("");
                       }}
                     >
-                      <span className="font-medium text-zinc-900 dark:text-zinc-100">{t.title}</span>
+                      <span className="font-medium text-zinc-900 dark:text-zinc-100">
+                        {t.title}
+                      </span>
                       <span className="ml-2 text-xs text-zinc-500">{statusLabel(t.status)}</span>
                     </button>
                   </li>

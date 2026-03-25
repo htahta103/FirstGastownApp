@@ -1,8 +1,8 @@
 import { motion } from "framer-motion";
 
 type TopBarProps = {
-  viewMode: "list" | "board";
-  onViewMode: (mode: "list" | "board") => void;
+  viewMode: "list" | "board" | "calendar";
+  onViewMode: (mode: "list" | "board" | "calendar") => void;
   isDark: boolean;
   onToggleTheme: () => void;
   onSearchOpen: () => void;
@@ -47,7 +47,7 @@ export function TopBar({
           role="tablist"
           aria-label="View mode"
         >
-          {(["list", "board"] as const).map((mode) => (
+          {(["list", "board", "calendar"] as const).map((mode) => (
             <motion.button
               key={mode}
               type="button"
@@ -55,7 +55,7 @@ export function TopBar({
               aria-selected={viewMode === mode}
               onClick={() => onViewMode(mode)}
               layout
-              className={`relative rounded-lg px-3 py-1.5 text-xs font-medium sm:text-sm ${
+              className={`relative rounded-lg px-2.5 py-1.5 text-xs font-medium sm:px-3 sm:text-sm ${
                 viewMode === mode
                   ? "text-violet-700 dark:text-zinc-100"
                   : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
@@ -68,7 +68,9 @@ export function TopBar({
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 />
               )}
-              <span className="relative z-10 capitalize">{mode}</span>
+              <span className="relative z-10 capitalize">
+                {mode === "calendar" ? "Calendar" : mode}
+              </span>
             </motion.button>
           ))}
         </div>
