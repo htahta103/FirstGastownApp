@@ -93,6 +93,17 @@ export function createApi(userId: string) {
 
     detachTag: (taskId: string, tagId: string) =>
       request<void>(`/api/tasks/${taskId}/tags/${tagId}`, { method: "DELETE" }),
+
+    searchTasks: (q: string) => {
+      const qs = new URLSearchParams({ q, limit: "30" }).toString();
+      return request<Task[]>(`/api/search?${qs}`);
+    },
+
+    updateTaskPosition: (id: string, body: { position: number; status?: string }) =>
+      request<Task>(`/api/tasks/${id}/position`, {
+        method: "PATCH",
+        body: JSON.stringify(body),
+      }),
   };
 }
 

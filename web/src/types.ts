@@ -1,6 +1,12 @@
 export type TaskPriority = "urgent" | "high" | "medium" | "low";
 export type TaskStatus = "todo" | "in_progress" | "done";
 
+export type SmartListFilter = "today" | "upcoming" | "overdue" | "completed";
+
+export type NavMode =
+  | { kind: "project"; projectId: string }
+  | { kind: "smart"; filter: SmartListFilter };
+
 export interface Tag {
   id: string;
   name: string;
