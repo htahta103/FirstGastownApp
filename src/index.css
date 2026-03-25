@@ -7,7 +7,16 @@
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 }
 
-/* Premium dark surface tokens */
+/* Surface tokens — light default, dark when .dark on root */
+:root {
+  --ui-glass-bg: rgb(255 255 255 / 0.72);
+  --ui-glass-border: rgb(15 23 42 / 0.08);
+  --ui-glass-highlight: rgb(15 23 42 / 0.04);
+  --ui-accent: rgb(109 40 217);
+  --ui-accent-dim: rgb(91 33 182);
+  --ui-ring: rgb(109 40 217 / 0.35);
+}
+
 :root.dark,
 .dark {
   --ui-glass-bg: rgb(255 255 255 / 0.04);
@@ -37,8 +46,23 @@
   background: linear-gradient(
     90deg,
     transparent,
-    rgb(255 255 255 / 0.06),
+    rgb(15 23 42 / 0.08),
     transparent
   );
   animation: ui-shimmer 1.4s ease-in-out infinite;
+}
+
+.dark .ui-skeleton-shimmer::after {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(255 255 255 / 0.06),
+    transparent
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-skeleton-shimmer::after {
+    animation: none;
+  }
 }

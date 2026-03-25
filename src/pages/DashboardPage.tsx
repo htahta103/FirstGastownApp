@@ -6,6 +6,7 @@ import { ProjectProgressRings } from '../components/dashboard/ProjectProgressRin
 import { QuickAddWidget } from '../components/dashboard/QuickAddWidget'
 import { StatCards } from '../components/dashboard/StatCards'
 import { UpcomingDeadlines } from '../components/dashboard/UpcomingDeadlines'
+import { PageTransition } from '../components/layout/PageTransition'
 import { Button, Skeleton, SkeletonCard } from '../components/ui'
 
 export function DashboardPage() {
@@ -32,6 +33,7 @@ export function DashboardPage() {
 
   if (dashboardQuery.isLoading) {
     return (
+      <PageTransition>
       <div className="space-y-6 p-6 sm:p-8">
         <div className="space-y-2">
           <Skeleton className="h-8 w-48" />
@@ -44,30 +46,34 @@ export function DashboardPage() {
         </div>
         <SkeletonCard />
       </div>
+      </PageTransition>
     )
   }
 
   if (dashboardQuery.isError) {
     const err = dashboardQuery.error as Error
     return (
+      <PageTransition>
       <div className="flex flex-col items-start gap-4 p-8">
-        <p className="text-sm text-red-400">{err.message}</p>
+        <p className="text-sm text-red-600 dark:text-red-400">{err.message}</p>
         <Button type="button" variant="secondary" onClick={() => void dashboardQuery.refetch()}>
           Retry
         </Button>
       </div>
+      </PageTransition>
     )
   }
 
   const d = dashboardQuery.data!
 
   return (
+    <PageTransition>
     <div className="space-y-8 p-6 sm:p-8">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight text-gray-50 sm:text-3xl">
+        <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl dark:text-gray-50">
           Dashboard
         </h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-slate-600 dark:text-gray-500">
           Overview of your workload, deadlines, and recent changes.
         </p>
       </header>
@@ -94,5 +100,6 @@ export function DashboardPage() {
         <UpcomingDeadlines tasks={d.upcoming_deadlines} />
       </div>
     </div>
+    </PageTransition>
   )
 }

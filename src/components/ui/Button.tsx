@@ -20,11 +20,14 @@ type ButtonProps = Omit<
 const variantClasses: Record<Variant, string> = {
   primary: `bg-gradient-to-b from-violet-500 to-violet-600 text-white shadow-lg shadow-violet-500/25
     ring-1 ring-inset ring-white/15 hover:from-violet-400 hover:to-violet-500 active:from-violet-600 active:to-violet-700`,
-  secondary: `border border-white/[0.12] bg-white/[0.05] text-gray-100 shadow-sm shadow-black/20 backdrop-blur-md
-    hover:bg-white/[0.08] hover:border-white/[0.18] active:bg-white/[0.06]`,
-  ghost: `text-gray-400 hover:bg-white/[0.06] hover:text-gray-100 active:bg-white/[0.04]`,
-  danger: `border border-red-500/25 bg-red-500/10 text-red-300 shadow-sm shadow-red-950/40
-    hover:bg-red-500/15 hover:border-red-400/35 active:bg-red-500/20`,
+  secondary: `border border-slate-200/90 bg-white/80 text-slate-800 shadow-sm shadow-slate-900/5 backdrop-blur-md
+    hover:border-slate-300 hover:bg-white active:bg-slate-50
+    dark:border-white/[0.12] dark:bg-white/[0.05] dark:text-gray-100 dark:shadow-black/20 dark:hover:border-white/[0.18] dark:hover:bg-white/[0.08] dark:active:bg-white/[0.06]`,
+  ghost: `text-slate-600 hover:bg-slate-100 hover:text-slate-900 active:bg-slate-200/60
+    dark:text-gray-400 dark:hover:bg-white/[0.06] dark:hover:text-gray-100 dark:active:bg-white/[0.04]`,
+  danger: `border border-red-200/80 bg-red-50 text-red-700 shadow-sm shadow-red-900/5
+    hover:border-red-300 hover:bg-red-100 active:bg-red-100/90
+    dark:border-red-500/25 dark:bg-red-500/10 dark:text-red-300 dark:shadow-red-950/40 dark:hover:border-red-400/35 dark:hover:bg-red-500/15 dark:active:bg-red-500/20`,
 }
 
 const sizeClasses: Record<Size, string> = {
@@ -80,7 +83,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         transition={{ type: 'spring', stiffness: 500, damping: 28 }}
         className={`inline-flex items-center justify-center font-medium tracking-tight transition-colors
           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/50 focus-visible:ring-offset-2
-          focus-visible:ring-offset-gray-950
+          focus-visible:ring-offset-slate-50 dark:focus-visible:ring-offset-gray-950
           disabled:opacity-45 disabled:pointer-events-none
           ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
         disabled={isDisabled}

@@ -50,7 +50,7 @@ export function ProjectForm({
       />
 
       <div className="space-y-2">
-        <span className="block text-xs font-medium uppercase tracking-wider text-gray-500">
+        <span className="block text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-gray-500">
           Icon
         </span>
         <div className="flex flex-wrap gap-2">
@@ -63,7 +63,7 @@ export function ProjectForm({
                 ${
                   icon === ic
                     ? 'border-violet-400/50 bg-violet-500/15 ring-1 ring-violet-400/30'
-                    : 'border-white/[0.08] bg-white/[0.03] hover:border-white/[0.14]'
+                    : 'border-slate-200/90 bg-white/80 hover:border-slate-300 dark:border-white/[0.08] dark:bg-white/[0.03] dark:hover:border-white/[0.14]'
                 }`}
               aria-label={`Select icon ${ic}`}
             >
@@ -81,7 +81,7 @@ export function ProjectForm({
       </div>
 
       <div className="space-y-2">
-        <span className="block text-xs font-medium uppercase tracking-wider text-gray-500">
+        <span className="block text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-gray-500">
           Color
         </span>
         <div className="flex flex-wrap gap-2">
@@ -90,8 +90,8 @@ export function ProjectForm({
               key={c}
               type="button"
               onClick={() => setColor(c)}
-              className={`size-9 rounded-full ring-2 ring-offset-2 ring-offset-gray-950 transition-shadow ${
-                color === c ? 'ring-violet-400' : 'ring-transparent hover:ring-white/20'
+              className={`size-9 rounded-full ring-2 ring-offset-2 ring-offset-slate-50 transition-shadow dark:ring-offset-gray-950 ${
+                color === c ? 'ring-violet-400' : 'ring-transparent hover:ring-slate-300 dark:hover:ring-white/20'
               }`}
               style={{ backgroundColor: c }}
               aria-label={`Color ${c}`}

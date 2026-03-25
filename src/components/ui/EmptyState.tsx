@@ -40,8 +40,8 @@ export function EmptyState({
           aria-hidden
         />
         <div
-          className="relative flex size-20 items-center justify-center rounded-2xl border border-white/[0.1]
-            bg-white/[0.04] shadow-lg shadow-violet-500/10 backdrop-blur-md"
+          className="relative flex size-20 items-center justify-center rounded-2xl border border-slate-200/90
+            bg-white/80 shadow-lg shadow-violet-500/10 backdrop-blur-md dark:border-white/[0.1] dark:bg-white/[0.04]"
         >
           {typeof icon === 'string' ? (
             <span className="text-4xl" role="img" aria-hidden>
@@ -52,9 +52,9 @@ export function EmptyState({
           )}
         </div>
       </div>
-      <h3 className="text-lg font-semibold tracking-tight text-gray-100">{title}</h3>
+      <h3 className="text-lg font-semibold tracking-tight text-slate-900 dark:text-gray-100">{title}</h3>
       {description && (
-        <p className="mt-2 max-w-sm text-sm leading-relaxed text-gray-500">{description}</p>
+        <p className="mt-2 max-w-sm text-sm leading-relaxed text-slate-600 dark:text-gray-500">{description}</p>
       )}
       {action && (
         <Button variant="primary" size="md" className="mt-8" onClick={action.onClick}>

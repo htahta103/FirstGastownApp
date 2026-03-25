@@ -25,7 +25,7 @@ export function ProjectCard({
     >
       <Card
         variant="default"
-        className="group h-full overflow-hidden border-white/[0.08]"
+        className="group h-full overflow-hidden border-slate-200/70 dark:border-white/[0.08]"
         hoverable
       >
         <div
@@ -40,27 +40,27 @@ export function ProjectCard({
           >
             <div className="flex items-start gap-3">
               <div
-                className="flex size-12 shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04] text-2xl"
+                className="flex size-12 shrink-0 items-center justify-center rounded-xl border border-slate-200/80 bg-white/70 text-2xl dark:border-white/[0.08] dark:bg-white/[0.04]"
                 style={{ boxShadow: `0 0 24px -4px ${project.color}55` }}
               >
                 {glyph}
               </div>
               <div className="min-w-0 flex-1">
-                <h2 className="truncate text-base font-semibold text-gray-100 group-hover:text-violet-200">
+                <h2 className="truncate text-base font-semibold text-slate-900 group-hover:text-violet-700 dark:text-gray-100 dark:group-hover:text-violet-200">
                   {project.name}
                 </h2>
-                <p className="mt-1 text-xs text-gray-600">
+                <p className="mt-1 text-xs text-slate-600 dark:text-gray-600">
                   {project.task_count} task{project.task_count === 1 ? '' : 's'}
                 </p>
-                <p className="mt-2 font-mono text-[10px] text-gray-600">{project.color}</p>
+                <p className="mt-2 font-mono text-[10px] text-slate-500 dark:text-gray-600">{project.color}</p>
               </div>
             </div>
           </Link>
-          <div className="flex flex-wrap gap-2 border-t border-white/[0.06] pt-4">
+          <div className="flex flex-wrap gap-2 border-t border-slate-200/70 pt-4 dark:border-white/[0.06]">
             <Button type="button" variant="secondary" size="sm" onClick={onEdit}>
               Edit
             </Button>
-            <Button type="button" variant="ghost" size="sm" className="text-red-400" onClick={onDelete}>
+            <Button type="button" variant="ghost" size="sm" className="text-red-600 dark:text-red-400" onClick={onDelete}>
               Delete
             </Button>
           </div>

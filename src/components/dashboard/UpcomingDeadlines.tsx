@@ -21,14 +21,14 @@ const priorityVariant = {
 
 export function UpcomingDeadlines({ tasks }: { tasks: Task[] }) {
   return (
-    <Card variant="default" className="border-white/[0.08]">
+    <Card variant="default" className="border-slate-200/70 dark:border-white/[0.08]">
       <CardHeader>
         <CardTitle>Upcoming deadlines</CardTitle>
         <CardDescription>Next 7 days · not done</CardDescription>
       </CardHeader>
       <CardContent className="max-h-[min(24rem,50vh)] space-y-0 overflow-y-auto px-6 pb-5 pt-2">
         {tasks.length === 0 ? (
-          <p className="py-8 text-center text-sm text-gray-600">Nothing due this week</p>
+          <p className="py-8 text-center text-sm text-slate-500 dark:text-gray-600">Nothing due this week</p>
         ) : (
           <ul className="space-y-2">
             {tasks.map((t, i) => (
@@ -40,11 +40,11 @@ export function UpcomingDeadlines({ tasks }: { tasks: Task[] }) {
               >
                 <Link
                   to={`/project/${t.project_id}`}
-                  className="flex items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 transition-colors hover:border-violet-500/25 hover:bg-white/[0.04]"
+                  className="flex items-start gap-3 rounded-xl border border-slate-200/80 bg-white/50 p-3 transition-colors hover:border-violet-300 hover:bg-violet-50/50 dark:border-white/[0.06] dark:bg-white/[0.02] dark:hover:border-violet-500/25 dark:hover:bg-white/[0.04]"
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-gray-100">{t.title}</p>
-                    <p className="mt-0.5 text-xs text-violet-400/90">
+                    <p className="truncate text-sm font-medium text-slate-900 dark:text-gray-100">{t.title}</p>
+                    <p className="mt-0.5 text-xs text-violet-600 dark:text-violet-400/90">
                       {t.due_date ? dueLabel(t.due_date) : '—'}
                     </p>
                   </div>

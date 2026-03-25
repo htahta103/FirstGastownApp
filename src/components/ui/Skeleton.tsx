@@ -23,7 +23,7 @@ export function Skeleton({
 }: SkeletonProps) {
   return (
     <div
-      className={`relative overflow-hidden bg-white/[0.06] ${variantShape[variant]} ${shimmer ? 'ui-skeleton-shimmer' : ''} ${className}`}
+      className={`relative overflow-hidden bg-slate-200/70 dark:bg-white/[0.06] ${variantShape[variant]} ${shimmer ? 'ui-skeleton-shimmer' : ''} ${className}`}
       {...props}
     />
   )
@@ -36,7 +36,7 @@ export function TaskSkeleton() {
       initial={{ opacity: 0.6 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.35 }}
-      className="flex items-center gap-3 rounded-2xl border border-white/[0.08] bg-white/[0.03] p-4 backdrop-blur-sm"
+      className="flex items-center gap-3 rounded-2xl border border-slate-200/80 bg-white/60 p-4 backdrop-blur-sm dark:border-white/[0.08] dark:bg-white/[0.03]"
     >
       <Skeleton variant="circle" className="size-10 shrink-0" />
       <div className="min-w-0 flex-1 space-y-2.5">
@@ -51,7 +51,7 @@ export function TaskSkeleton() {
 /** Block placeholder for cards / panels */
 export function SkeletonCard() {
   return (
-    <div className="space-y-4 rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6 backdrop-blur-md">
+    <div className="space-y-4 rounded-2xl border border-slate-200/80 bg-white/60 p-6 backdrop-blur-md dark:border-white/[0.08] dark:bg-white/[0.03]">
       <Skeleton variant="line" className="h-5 w-2/5" />
       <Skeleton className="h-24 w-full" />
       <div className="flex gap-2">

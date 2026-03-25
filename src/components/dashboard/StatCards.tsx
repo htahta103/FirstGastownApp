@@ -49,13 +49,13 @@ export function StatCards({ stats }: { stats: DashboardStats }) {
             className={`overflow-hidden border ${item.border} bg-gradient-to-br ${item.accent}`}
           >
             <CardContent className="py-5">
-              <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
+              <p className="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-gray-500">
                 {item.label}
               </p>
-              <p className="mt-2 text-3xl font-semibold tabular-nums tracking-tight text-gray-50">
+              <p className="mt-2 text-3xl font-semibold tabular-nums tracking-tight text-slate-900 dark:text-gray-50">
                 {stats[item.valueKey]}
               </p>
-              <p className="mt-1 text-xs text-gray-600">{item.sub}</p>
+              <p className="mt-1 text-xs text-slate-600 dark:text-gray-600">{item.sub}</p>
             </CardContent>
           </Card>
         </motion.div>

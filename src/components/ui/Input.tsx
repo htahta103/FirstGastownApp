@@ -14,7 +14,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-xs font-medium uppercase tracking-wider text-gray-500"
+            className="block text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-gray-500"
           >
             {label}
           </label>
@@ -22,12 +22,12 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         <input
           ref={ref}
           id={inputId}
-          className={`w-full rounded-xl border bg-white/[0.03] px-3.5 py-2.5 text-sm text-gray-100
-            shadow-inner shadow-black/20 backdrop-blur-sm transition-[border-color,box-shadow,transform] duration-200
-            placeholder:text-gray-600
-            border-white/[0.08] hover:border-white/[0.12]
-            focus:border-violet-400/40 focus:ring-2 focus:ring-violet-500/20 focus:outline-none
-            focus:scale-[1.01]
+          className={`w-full rounded-xl border border-slate-200/90 bg-white/90 px-3.5 py-2.5 text-sm text-slate-900
+            shadow-inner shadow-slate-900/5 backdrop-blur-sm transition-[border-color,box-shadow,transform] duration-200
+            placeholder:text-slate-400 hover:border-slate-300
+            focus:border-violet-400/50 focus:ring-2 focus:ring-violet-500/20 focus:outline-none focus:scale-[1.01]
+            dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-gray-100 dark:shadow-black/20 dark:placeholder:text-gray-600 dark:hover:border-white/[0.12]
+            dark:focus:border-violet-400/40
             ${error ? 'border-red-400/40 focus:border-red-400/50 focus:ring-red-500/15' : ''} ${className}`}
           aria-invalid={error ? true : undefined}
           aria-describedby={
@@ -38,7 +38,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           {...props}
         />
         {hint && !error && (
-          <p id={`${inputId}-hint`} className="text-xs text-gray-600">
+          <p id={`${inputId}-hint`} className="text-xs text-slate-500 dark:text-gray-600">
             {hint}
           </p>
         )}

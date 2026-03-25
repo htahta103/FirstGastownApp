@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { createTask } from '../../api/client'
+import { createTask, deleteTask } from '../../api/client'
 import type { Project } from '../../types'
 import {
   Button,
@@ -33,12 +33,27 @@ export function QuickAddWidget({ projects }: { projects: Project[] }) {
         status: 'todo',
         priority: 'medium',
       }),
-    onSuccess: () => {
+    onSuccess: (task) => {
       setTitle('')
       void qc.invalidateQueries({ queryKey: ['dashboard'] })
       void qc.invalidateQueries({ queryKey: ['projects'] })
       void qc.invalidateQueries({ queryKey: ['tasks'] })
-      toast('Task created', 'success')
+      toast({
+        message: 'Task created',
+        type: 'success',
+        undoLabel: 'Undo',
+        onUndo: () => {
+          deleteTask(task.id)
+            .then(() => {
+              void qc.invalidateQueries({ queryKey: ['dashboard'] })
+              void qc.invalidateQueries({ queryKey: ['projects'] })
+              void qc.invalidateQueries({ queryKey: ['tasks'] })
+            })
+            .catch((err: Error) => {
+              toast({ message: err.message, type: 'error' })
+            })
+        },
+      })
     },
     onError: (e: Error) => {
       toast({ message: e.message, type: 'error' })
@@ -49,14 +64,17 @@ export function QuickAddWidget({ projects }: { projects: Project[] }) {
   const canSubmit = title.trim().length > 0 && resolvedProjectId.length > 0 && !mutation.isPending
 
   return (
-    <Card variant="default" className="border-violet-500/20 bg-gradient-to-br from-violet-500/10 via-transparent to-transparent">
+    <Card
+      variant="default"
+      className="border-violet-200/60 bg-gradient-to-br from-violet-100/80 via-white/40 to-transparent dark:border-violet-500/20 dark:from-violet-500/10 dark:via-transparent dark:to-transparent"
+    >
       <CardHeader>
         <CardTitle>Quick add</CardTitle>
         <CardDescription>New task in a few keystrokes</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {projects.length === 0 ? (
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-slate-600 dark:text-gray-500">
             Create a project first — then you can add tasks here.
           </p>
         ) : (

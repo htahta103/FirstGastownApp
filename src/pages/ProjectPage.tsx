@@ -6,6 +6,7 @@ import type { Project } from '../types'
 import { displayProjectIcon } from '../lib/projectUi'
 import { DeleteProjectModal } from '../components/projects/DeleteProjectModal'
 import { SaveProjectModal } from '../components/projects/SaveProjectModal'
+import { PageTransition } from '../components/layout/PageTransition'
 import { Button, Card, CardContent, Skeleton } from '../components/ui'
 
 export function ProjectPage() {
@@ -21,32 +22,44 @@ export function ProjectPage() {
 
   if (!projectId) {
     return (
+      <PageTransition>
       <div className="p-8">
-        <p className="text-gray-500">Missing project id.</p>
-        <Link to="/projects" className="mt-2 inline-block text-violet-400 hover:text-violet-300">
+        <p className="text-slate-600 dark:text-gray-500">Missing project id.</p>
+        <Link
+          to="/projects"
+          className="mt-2 inline-block text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300"
+        >
           ← Projects
         </Link>
       </div>
+      </PageTransition>
     )
   }
 
   if (q.isLoading) {
     return (
+      <PageTransition>
       <div className="space-y-6 p-8">
         <Skeleton className="h-10 w-64" />
         <Skeleton className="h-32 w-full max-w-xl rounded-2xl" />
       </div>
+      </PageTransition>
     )
   }
 
   if (q.isError || !q.data) {
     return (
+      <PageTransition>
       <div className="p-8">
-        <p className="text-red-400">{(q.error as Error)?.message ?? 'Project not found.'}</p>
-        <Link to="/projects" className="mt-4 inline-block text-violet-400 hover:text-violet-300">
+        <p className="text-red-600 dark:text-red-400">{(q.error as Error)?.message ?? 'Project not found.'}</p>
+        <Link
+          to="/projects"
+          className="mt-4 inline-block text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300"
+        >
           ← All projects
         </Link>
       </div>
+      </PageTransition>
     )
   }
 
@@ -54,11 +67,12 @@ export function ProjectPage() {
   const glyph = displayProjectIcon(p.icon)
 
   return (
+    <PageTransition>
     <div className="p-6 sm:p-8">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
         <div className="flex min-w-0 items-start gap-4">
           <div
-            className="flex size-16 shrink-0 items-center justify-center rounded-2xl border border-white/[0.1] text-3xl"
+            className="flex size-16 shrink-0 items-center justify-center rounded-2xl border border-slate-200/90 text-3xl dark:border-white/[0.1]"
             style={{
               backgroundColor: `${p.color}22`,
               boxShadow: `0 0 40px -8px ${p.color}66`,
@@ -67,12 +81,12 @@ export function ProjectPage() {
             {glyph}
           </div>
           <div className="min-w-0">
-            <h1 className="text-2xl font-semibold tracking-tight text-gray-50 sm:text-3xl">
+            <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl dark:text-gray-50">
               {p.name}
             </h1>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-slate-600 dark:text-gray-500">
               {p.task_count} task{p.task_count === 1 ? '' : 's'} ·{' '}
-              <span className="font-mono text-gray-600">{p.color}</span>
+              <span className="font-mono text-slate-500 dark:text-gray-600">{p.color}</span>
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
               <Button type="button" variant="secondary" size="sm" onClick={() => setEditing(p)}>
@@ -82,7 +96,7 @@ export function ProjectPage() {
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="text-red-400"
+                className="text-red-600 dark:text-red-400"
                 onClick={() => setDeleting(p)}
               >
                 Delete
@@ -92,17 +106,17 @@ export function ProjectPage() {
         </div>
         <Link
           to="/tasks"
-          className="inline-flex shrink-0 items-center justify-center rounded-xl border border-white/[0.08] px-4 py-2.5 text-sm font-medium text-violet-300 transition-colors hover:bg-white/[0.04]"
+          className="inline-flex shrink-0 items-center justify-center rounded-xl border border-slate-200/90 px-4 py-2.5 text-sm font-medium text-violet-700 transition-colors hover:bg-violet-50 dark:border-white/[0.08] dark:text-violet-300 dark:hover:bg-white/[0.04]"
         >
           View all tasks →
         </Link>
       </div>
 
-      <Card variant="subtle" className="mt-10 max-w-2xl border-dashed border-white/10">
+      <Card variant="subtle" className="mt-10 max-w-2xl border-dashed border-slate-300/90 dark:border-white/10">
         <CardContent>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-slate-600 dark:text-gray-500">
             Task board and filters for this project can live here next. For now, use{' '}
-            <Link to="/tasks" className="text-violet-400 hover:text-violet-300">
+            <Link to="/tasks" className="text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300">
               Tasks
             </Link>{' '}
             or the dashboard quick add with this project selected.
@@ -113,5 +127,6 @@ export function ProjectPage() {
       <SaveProjectModal open={Boolean(editing)} project={editing} onClose={() => setEditing(null)} />
       <DeleteProjectModal project={deleting} onClose={() => setDeleting(null)} />
     </div>
+    </PageTransition>
   )
 }

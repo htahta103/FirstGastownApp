@@ -15,7 +15,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
         {label && (
           <label
             htmlFor={selectId}
-            className="block text-xs font-medium uppercase tracking-wider text-gray-500"
+            className="block text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-gray-500"
           >
             {label}
           </label>
@@ -24,11 +24,12 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           <select
             ref={ref}
             id={selectId}
-            className={`w-full appearance-none rounded-xl border bg-white/[0.03] py-2.5 pl-3.5 pr-10 text-sm
-              text-gray-100 shadow-inner shadow-black/20 backdrop-blur-sm transition-colors
-              border-white/[0.08] hover:border-white/[0.12]
-              focus:border-violet-400/40 focus:ring-2 focus:ring-violet-500/20 focus:outline-none
+            className={`w-full appearance-none rounded-xl border border-slate-200/90 bg-white/90 py-2.5 pl-3.5 pr-10 text-sm
+              text-slate-900 shadow-inner shadow-slate-900/5 backdrop-blur-sm transition-colors hover:border-slate-300
+              focus:border-violet-400/50 focus:ring-2 focus:ring-violet-500/20 focus:outline-none
               disabled:cursor-not-allowed disabled:opacity-45
+              dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-gray-100 dark:shadow-black/20 dark:hover:border-white/[0.12]
+              dark:focus:border-violet-400/40
               ${error ? 'border-red-400/40 focus:border-red-400/50 focus:ring-red-500/15' : ''} ${className}`}
             aria-invalid={error ? true : undefined}
             aria-describedby={
@@ -45,7 +46,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
             ))}
           </select>
           <span
-            className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+            className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-gray-500"
             aria-hidden
           >
             <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -54,7 +55,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           </span>
         </div>
         {hint && !error && (
-          <p id={`${selectId}-hint`} className="text-xs text-gray-600">
+          <p id={`${selectId}-hint`} className="text-xs text-slate-500 dark:text-gray-600">
             {hint}
           </p>
         )}

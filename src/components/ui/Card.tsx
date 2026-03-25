@@ -24,9 +24,10 @@ export function Card({
 }: CardProps) {
   const surface =
     variant === 'subtle'
-      ? `bg-white/[0.025] border-white/[0.06] shadow-lg shadow-black/30`
-      : `bg-gradient-to-br from-white/[0.09] via-white/[0.04] to-white/[0.02]
-         border-white/[0.12] shadow-[0_0_0_1px_rgba(255,255,255,0.04)_inset,0_24px_48px_-12px_rgba(0,0,0,0.55)]`
+      ? `border-slate-200/70 bg-white/55 shadow-md shadow-slate-900/[0.04] dark:border-white/[0.06] dark:bg-white/[0.025] dark:shadow-lg dark:shadow-black/30`
+      : `border-slate-200/80 bg-gradient-to-br from-white/90 via-white/70 to-slate-50/40 shadow-[0_0_0_1px_rgba(15,23,42,0.04)_inset,0_20px_40px_-12px_rgba(15,23,42,0.12)]
+         dark:from-white/[0.09] dark:via-white/[0.04] dark:to-white/[0.02] dark:border-white/[0.12]
+         dark:shadow-[0_0_0_1px_rgba(255,255,255,0.04)_inset,0_24px_48px_-12px_rgba(0,0,0,0.55)]`
 
   return (
     <motion.div
@@ -37,8 +38,8 @@ export function Card({
       }
       className={`relative overflow-hidden rounded-2xl border backdrop-blur-xl ${surface}
         before:pointer-events-none before:absolute before:inset-0 before:rounded-2xl
-        before:bg-gradient-to-br before:from-white/[0.07] before:to-transparent before:to-40%
-        before:opacity-50 ${className}`}
+        before:bg-gradient-to-br before:from-white/40 before:to-transparent before:to-40%
+        before:opacity-80 dark:before:from-white/[0.07] dark:before:opacity-50 ${className}`}
       {...props}
     >
       <div className="relative z-[1]">{children}</div>
@@ -64,7 +65,7 @@ type CardTextProps = Omit<
 export function CardHeader({ className = '', ...props }: CardSectionProps) {
   return (
     <div
-      className={`border-b border-white/[0.06] px-6 py-4 ${className}`}
+      className={`border-b border-slate-200/70 px-6 py-4 dark:border-white/[0.06] ${className}`}
       {...props}
     />
   )
@@ -73,7 +74,7 @@ export function CardHeader({ className = '', ...props }: CardSectionProps) {
 export function CardTitle({ className = '', ...props }: CardHeadingProps) {
   return (
     <h3
-      className={`text-base font-semibold tracking-tight text-gray-100 ${className}`}
+      className={`text-base font-semibold tracking-tight text-slate-900 dark:text-gray-100 ${className}`}
       {...props}
     />
   )
@@ -81,7 +82,7 @@ export function CardTitle({ className = '', ...props }: CardHeadingProps) {
 
 export function CardDescription({ className = '', ...props }: CardTextProps) {
   return (
-    <p className={`mt-1 text-sm text-gray-500 ${className}`} {...props} />
+    <p className={`mt-1 text-sm text-slate-600 dark:text-gray-500 ${className}`} {...props} />
   )
 }
 
@@ -92,7 +93,7 @@ export function CardContent({ className = '', ...props }: CardSectionProps) {
 export function CardFooter({ className = '', ...props }: CardSectionProps) {
   return (
     <div
-      className={`border-t border-white/[0.06] px-6 py-4 ${className}`}
+      className={`border-t border-slate-200/70 px-6 py-4 dark:border-white/[0.06] ${className}`}
       {...props}
     />
   )

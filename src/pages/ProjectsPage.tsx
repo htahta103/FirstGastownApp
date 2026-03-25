@@ -5,6 +5,7 @@ import type { Project } from '../types'
 import { DeleteProjectModal } from '../components/projects/DeleteProjectModal'
 import { ProjectCard } from '../components/projects/ProjectCard'
 import { SaveProjectModal } from '../components/projects/SaveProjectModal'
+import { PageTransition } from '../components/layout/PageTransition'
 import { Button, EmptyState, Skeleton } from '../components/ui'
 
 export function ProjectsPage() {
@@ -18,13 +19,14 @@ export function ProjectsPage() {
   const [deleting, setDeleting] = useState<Project | null>(null)
 
   return (
+    <PageTransition>
     <div className="p-6 sm:p-8">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-gray-50 sm:text-3xl">
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl dark:text-gray-50">
             Projects
           </h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-slate-600 dark:text-gray-500">
             Organize work with icons, colors, and quick access from the sidebar.
           </p>
         </div>
@@ -42,8 +44,8 @@ export function ProjectsPage() {
       )}
 
       {isError && (
-        <div className="mt-10 rounded-xl border border-red-500/20 bg-red-950/20 p-6">
-          <p className="text-sm text-red-300">{(error as Error).message}</p>
+        <div className="mt-10 rounded-xl border border-red-200/80 bg-red-50/90 p-6 dark:border-red-500/20 dark:bg-red-950/20">
+          <p className="text-sm text-red-700 dark:text-red-300">{(error as Error).message}</p>
           <Button type="button" variant="secondary" className="mt-4" onClick={() => void refetch()}>
             Retry
           </Button>
@@ -82,5 +84,6 @@ export function ProjectsPage() {
       />
       <DeleteProjectModal project={deleting} onClose={() => setDeleting(null)} />
     </div>
+    </PageTransition>
   )
 }

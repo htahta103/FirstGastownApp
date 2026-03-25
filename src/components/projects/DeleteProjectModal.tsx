@@ -44,8 +44,8 @@ export function DeleteProjectModal({
     >
       {project && (
         <div className="space-y-6">
-          <p className="text-sm text-gray-400">
-            Delete <span className="font-medium text-gray-200">{project.name}</span>?
+          <p className="text-sm text-slate-600 dark:text-gray-400">
+            Delete <span className="font-medium text-slate-900 dark:text-gray-200">{project.name}</span>?
           </p>
           <div className="flex flex-wrap justify-end gap-2">
             <Button type="button" variant="ghost" onClick={onClose} disabled={mutation.isPending}>

@@ -12,6 +12,7 @@ interface UIState {
   toggleTheme: () => void
   setActiveView: (view: View) => void
   toggleSidebar: () => void
+  setSidebarOpen: (open: boolean) => void
   setQuickAddOpen: (open: boolean) => void
   setSearchOpen: (open: boolean) => void
 }
@@ -28,6 +29,7 @@ export const useUIStore = create<UIState>()(
         set((s) => ({ theme: s.theme === 'dark' ? 'light' : 'dark' })),
       setActiveView: (view) => set({ activeView: view }),
       toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
+      setSidebarOpen: (open) => set({ sidebarOpen: open }),
       setQuickAddOpen: (open) => set({ quickAddOpen: open }),
       setSearchOpen: (open) => set({ searchOpen: open }),
     }),

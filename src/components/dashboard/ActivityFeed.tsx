@@ -6,28 +6,28 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui
 function actionLabel(action: string) {
   switch (action) {
     case 'created':
-      return { text: 'Created', className: 'text-sky-400' }
+      return { text: 'Created', className: 'text-sky-600 dark:text-sky-400' }
     case 'completed':
-      return { text: 'Completed', className: 'text-emerald-400' }
+      return { text: 'Completed', className: 'text-emerald-600 dark:text-emerald-400' }
     case 'updated':
-      return { text: 'Updated', className: 'text-amber-400' }
+      return { text: 'Updated', className: 'text-amber-600 dark:text-amber-400' }
     default:
-      return { text: action, className: 'text-gray-400' }
+      return { text: action, className: 'text-slate-500 dark:text-gray-400' }
   }
 }
 
 export function ActivityFeed({ items }: { items: Activity[] }) {
   return (
-    <Card variant="default" className="border-white/[0.08]">
+    <Card variant="default" className="border-slate-200/70 dark:border-white/[0.08]">
       <CardHeader>
         <CardTitle>Recent activity</CardTitle>
         <CardDescription>Latest changes to your tasks</CardDescription>
       </CardHeader>
       <CardContent className="max-h-[min(24rem,50vh)] space-y-0 overflow-y-auto px-6 pb-5 pt-2">
         {items.length === 0 ? (
-          <p className="py-8 text-center text-sm text-gray-600">No activity yet</p>
+          <p className="py-8 text-center text-sm text-slate-500 dark:text-gray-600">No activity yet</p>
         ) : (
-          <ul className="divide-y divide-white/[0.06]">
+          <ul className="divide-y divide-slate-200/80 dark:divide-white/[0.06]">
             {items.map((a, i) => {
               const meta = actionLabel(a.action)
               const when = formatDistanceToNow(new Date(a.timestamp), { addSuffix: true })
@@ -44,12 +44,12 @@ export function ActivityFeed({ items }: { items: Activity[] }) {
                     aria-hidden
                   />
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm text-gray-200">
+                    <p className="text-sm text-slate-800 dark:text-gray-200">
                       <span className={`font-medium ${meta.className}`}>{meta.text}</span>{' '}
-                      <span className="text-gray-400">·</span>{' '}
-                      <span className="text-gray-300">{a.task_title}</span>
+                      <span className="text-slate-400 dark:text-gray-400">·</span>{' '}
+                      <span className="text-slate-700 dark:text-gray-300">{a.task_title}</span>
                     </p>
-                    <p className="mt-0.5 text-xs text-gray-600">{when}</p>
+                    <p className="mt-0.5 text-xs text-slate-500 dark:text-gray-600">{when}</p>
                   </div>
                 </motion.li>
               )
