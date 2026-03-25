@@ -148,6 +148,7 @@ func newRouter(cfg *config.Config, pool *pgxpool.Pool) http.Handler {
 
 		api.Route("/tasks", func(r chi.Router) {
 			r.Get("/", tasks.List)
+			r.Get("/calendar", tasks.Calendar)
 			r.Post("/", tasks.Create)
 			r.Route("/{id}", func(r chi.Router) {
 				r.Get("/", tasks.Get)

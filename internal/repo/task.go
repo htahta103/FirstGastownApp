@@ -136,6 +136,104 @@ func (r *TaskRepo) List(ctx context.Context, userID uuid.UUID, f model.TaskFilte
 	return &model.TaskListResult{Tasks: tasks, Total: total}, nil
 }
 
+const calendarTaskLimit = 5000
+
+// ListCalendarRange returns tasks with a due date in [from, to] (inclusive, YYYY-MM-DD),
+// ordered by due_date then position. Optional filters match List.
+func (r *TaskRepo) ListCalendarRange(ctx context.Context, userID uuid.UUID, from, to string, f model.TaskCalendarFilter) ([]model.Task, error) {
+	var (
+		where  []string
+		args   []interface{}
+		argIdx = 1
+	)
+
+	where = append(where, fmt.Sprintf("t.user_id = $%d", argIdx))
+	args = append(args, userID)
+	argIdx++
+
+	where = append(where, "t.due_date IS NOT NULL")
+	where = append(where, fmt.Sprintf("t.due_date >= $%d::date", argIdx))
+	args = append(args, from)
+	argIdx++
+	where = append(where, fmt.Sprintf("t.due_date <= $%d::date", argIdx))
+	args = append(args, to)
+	argIdx++
+
+	if f.ProjectID != nil {
+		where = append(where, fmt.Sprintf("t.project_id = $%d", argIdx))
+		args = append(args, *f.ProjectID)
+		argIdx++
+	}
+	if f.Status != nil {
+		where = append(where, fmt.Sprintf("t.status = $%d", argIdx))
+		args = append(args, *f.Status)
+		argIdx++
+	}
+	if f.Priority != nil {
+		where = append(where, fmt.Sprintf("t.priority = $%d", argIdx))
+		args = append(args, *f.Priority)
+		argIdx++
+	}
+	if f.TagID != nil {
+		where = append(where, fmt.Sprintf(
+			"EXISTS (SELECT 1 FROM task_tags tt WHERE tt.task_id = t.id AND tt.tag_id = $%d)", argIdx))
+		args = append(args, *f.TagID)
+		argIdx++
+	}
+
+	whereClause := strings.Join(where, " AND ")
+	q := fmt.Sprintf(
+		`SELECT t.id, t.user_id, t.project_id, t.title, t.description, t.due_date,
+		        t.priority, t.status, t.position, t.created_at, t.updated_at
+		 FROM tasks t
+		 WHERE %s
+		 ORDER BY t.due_date ASC, t.position ASC
+		 LIMIT $%d`,
+		whereClause, argIdx,
+	)
+	args = append(args, calendarTaskLimit)
+
+	rows, err := r.pool.Query(ctx, q, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tasks []model.Task
+	for rows.Next() {
+		var t model.Task
+		if err := rows.Scan(&t.ID, &t.UserID, &t.ProjectID, &t.Title, &t.Description,
+			&t.DueDate, &t.Priority, &t.Status, &t.Position,
+			&t.CreatedAt, &t.UpdatedAt); err != nil {
+			return nil, err
+		}
+		tasks = append(tasks, t)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	if len(tasks) > 0 {
+		taskIDs := make([]uuid.UUID, len(tasks))
+		taskMap := make(map[uuid.UUID]*model.Task, len(tasks))
+		for i := range tasks {
+			taskIDs[i] = tasks[i].ID
+			taskMap[tasks[i].ID] = &tasks[i]
+		}
+		if err := r.loadSubtaskCounts(ctx, taskMap, taskIDs); err != nil {
+			return nil, err
+		}
+		if err := r.loadTags(ctx, taskMap, taskIDs); err != nil {
+			return nil, err
+		}
+	}
+
+	if tasks == nil {
+		tasks = []model.Task{}
+	}
+	return tasks, nil
+}
+
 func (r *TaskRepo) GetByID(ctx context.Context, userID, id uuid.UUID) (*model.Task, error) {
 	var t model.Task
 	err := r.pool.QueryRow(ctx,

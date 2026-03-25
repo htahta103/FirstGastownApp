@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"time"
 
 	"todoflow/internal/apierr"
 	"todoflow/internal/model"
@@ -9,6 +10,8 @@ import (
 
 	"github.com/google/uuid"
 )
+
+const dateLayout = "2006-01-02"
 
 type TaskHandler struct {
 	repo *repo.TaskRepo
@@ -63,6 +66,58 @@ func (h *TaskHandler) List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, result)
+}
+
+// Calendar returns tasks grouped by due_date for a visible calendar range (weekly/monthly UIs send from/to).
+func (h *TaskHandler) Calendar(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query()
+	fromRaw, toRaw := q.Get("from"), q.Get("to")
+	if fromRaw == "" || toRaw == "" {
+		apierr.Write(w, apierr.BadRequest("from and to query parameters are required (YYYY-MM-DD)"))
+		return
+	}
+	fromT, err1 := time.Parse(dateLayout, fromRaw)
+	toT, err2 := time.Parse(dateLayout, toRaw)
+	if err1 != nil || err2 != nil {
+		apierr.Write(w, apierr.BadRequest("from and to must be valid dates (YYYY-MM-DD)"))
+		return
+	}
+	if fromT.After(toT) {
+		apierr.Write(w, apierr.BadRequest("from must be on or before to"))
+		return
+	}
+
+	f := model.TaskCalendarFilter{}
+	if v := q.Get("project_id"); v != "" {
+		id, err := uuid.Parse(v)
+		if err != nil {
+			apierr.Write(w, apierr.BadRequest("project_id must be a valid UUID"))
+			return
+		}
+		f.ProjectID = &id
+	}
+	if v := q.Get("status"); v != "" {
+		f.Status = &v
+	}
+	if v := q.Get("priority"); v != "" {
+		f.Priority = &v
+	}
+	if v := q.Get("tag_id"); v != "" {
+		id, err := uuid.Parse(v)
+		if err != nil {
+			apierr.Write(w, apierr.BadRequest("tag_id must be a valid UUID"))
+			return
+		}
+		f.TagID = &id
+	}
+
+	tasks, err := h.repo.ListCalendarRange(r.Context(), userID(r), fromRaw, toRaw, f)
+	if err != nil {
+		apierr.Write(w, apierr.Internal("failed to load calendar tasks"))
+		return
+	}
+	out := model.BuildTaskCalendar(fromRaw, toRaw, tasks)
+	writeJSON(w, http.StatusOK, out)
 }
 
 func (h *TaskHandler) Get(w http.ResponseWriter, r *http.Request) {

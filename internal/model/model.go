@@ -29,20 +29,20 @@ type ProjectInput struct {
 }
 
 type Task struct {
-	ID               uuid.UUID  `json:"id"`
-	UserID           uuid.UUID  `json:"-"`
-	ProjectID        uuid.UUID  `json:"project_id"`
-	Title            string     `json:"title"`
-	Description      *string    `json:"description"`
-	DueDate          *string    `json:"due_date"`
-	Priority         string     `json:"priority"`
-	Status           string     `json:"status"`
-	Position         float64    `json:"position"`
-	SubtaskTotal     int        `json:"subtask_total"`
-	SubtaskCompleted int        `json:"subtask_completed"`
-	Tags             []Tag      `json:"tags"`
-	CreatedAt        time.Time  `json:"created_at"`
-	UpdatedAt        time.Time  `json:"updated_at"`
+	ID               uuid.UUID `json:"id"`
+	UserID           uuid.UUID `json:"-"`
+	ProjectID        uuid.UUID `json:"project_id"`
+	Title            string    `json:"title"`
+	Description      *string   `json:"description"`
+	DueDate          *string   `json:"due_date"`
+	Priority         string    `json:"priority"`
+	Status           string    `json:"status"`
+	Position         float64   `json:"position"`
+	SubtaskTotal     int       `json:"subtask_total"`
+	SubtaskCompleted int       `json:"subtask_completed"`
+	Tags             []Tag     `json:"tags"`
+	CreatedAt        time.Time `json:"created_at"`
+	UpdatedAt        time.Time `json:"updated_at"`
 }
 
 type TaskInput struct {
@@ -71,6 +71,27 @@ type PositionUpdate struct {
 type TaskListResult struct {
 	Tasks []Task `json:"tasks"`
 	Total int    `json:"total"`
+}
+
+// TaskCalendarDay is a sparse calendar cell: only dates that have at least one task.
+type TaskCalendarDay struct {
+	Date  string `json:"date"`
+	Tasks []Task `json:"tasks"`
+}
+
+// TaskCalendarResult is the payload for GET /tasks/calendar (monthly/weekly ranges via from/to).
+type TaskCalendarResult struct {
+	From  string            `json:"from"`
+	To    string            `json:"to"`
+	Days  []TaskCalendarDay `json:"days"`
+	Total int               `json:"total"`
+}
+
+type TaskCalendarFilter struct {
+	ProjectID *uuid.UUID
+	Status    *string
+	Priority  *string
+	TagID     *uuid.UUID
 }
 
 type TaskFilter struct {

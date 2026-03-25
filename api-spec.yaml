@@ -109,6 +109,25 @@ components:
         position: { type: number, format: double }
         status:   { type: string, enum: [todo, in_progress, done], description: "Set when dragging between board columns" }
 
+    TaskCalendarDay:
+      type: object
+      description: Sparse cell — only dates that have tasks
+      properties:
+        date:  { type: string, format: date }
+        tasks:
+          type: array
+          items: { $ref: "#/components/schemas/Task" }
+
+    TaskCalendarResult:
+      type: object
+      properties:
+        from:  { type: string, format: date, description: "Requested range start (inclusive)" }
+        to:    { type: string, format: date, description: "Requested range end (inclusive)" }
+        days:
+          type: array
+          items: { $ref: "#/components/schemas/TaskCalendarDay" }
+        total: { type: integer, description: "Task count in range (same as sum of day task counts)" }
+
     Subtask:
       type: object
       properties:
@@ -330,6 +349,47 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Task" }
         "422":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /tasks/calendar:
+    get:
+      summary: Tasks for calendar (weekly/monthly) grouped by due date
+      description: |
+        Returns tasks with a due date in [from, to] (inclusive). Same task shape as list/board
+        (tags, subtask counts). Omit empty days — clients lay out the grid locally.
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+        - name: from
+          in: query
+          required: true
+          schema: { type: string, format: date }
+          description: Range start (YYYY-MM-DD)
+        - name: to
+          in: query
+          required: true
+          schema: { type: string, format: date }
+          description: Range end (YYYY-MM-DD)
+        - name: project_id
+          in: query
+          schema: { type: string, format: uuid }
+        - name: status
+          in: query
+          schema: { type: string, enum: [todo, in_progress, done] }
+        - name: priority
+          in: query
+          schema: { type: string, enum: [urgent, high, medium, low] }
+        - name: tag_id
+          in: query
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Tasks grouped by due_date
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TaskCalendarResult" }
+        "400":
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
