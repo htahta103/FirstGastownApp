@@ -23,8 +23,12 @@ func (r *ProjectRepo) List(ctx context.Context, userID uuid.UUID) ([]model.Proje
 		`SELECT p.id, p.user_id, p.name, p.icon, p.color, p.created_at, p.updated_at,
 		        COALESCE(tc.cnt, 0) AS task_count
 		 FROM projects p
-		 LEFT JOIN (SELECT project_id, COUNT(*) AS cnt FROM tasks GROUP BY project_id) tc
-		   ON tc.project_id = p.id
+		 LEFT JOIN (
+		     SELECT project_id, COUNT(*) AS cnt
+		     FROM tasks
+		     WHERE user_id = $1
+		     GROUP BY project_id
+		 ) tc ON tc.project_id = p.id
 		 WHERE p.user_id = $1
 		 ORDER BY p.created_at DESC`,
 		userID,
@@ -52,8 +56,12 @@ func (r *ProjectRepo) GetByID(ctx context.Context, userID, id uuid.UUID) (*model
 		`SELECT p.id, p.user_id, p.name, p.icon, p.color, p.created_at, p.updated_at,
 		        COALESCE(tc.cnt, 0) AS task_count
 		 FROM projects p
-		 LEFT JOIN (SELECT project_id, COUNT(*) AS cnt FROM tasks GROUP BY project_id) tc
-		   ON tc.project_id = p.id
+		 LEFT JOIN (
+		     SELECT project_id, COUNT(*) AS cnt
+		     FROM tasks
+		     WHERE user_id = $2
+		     GROUP BY project_id
+		 ) tc ON tc.project_id = p.id
 		 WHERE p.id = $1 AND p.user_id = $2`,
 		id, userID,
 	).Scan(&p.ID, &p.UserID, &p.Name, &p.Icon, &p.Color,
@@ -74,14 +82,17 @@ func (r *ProjectRepo) Create(ctx context.Context, userID uuid.UUID, in model.Pro
 		color = *in.Color
 	}
 
-	var p model.Project
+	var id uuid.UUID
 	err := r.pool.QueryRow(ctx,
 		`INSERT INTO projects (user_id, name, icon, color)
 		 VALUES ($1, $2, $3, $4)
-		 RETURNING id, user_id, name, icon, color, created_at, updated_at`,
+		 RETURNING id`,
 		userID, in.Name, icon, color,
-	).Scan(&p.ID, &p.UserID, &p.Name, &p.Icon, &p.Color, &p.CreatedAt, &p.UpdatedAt)
-	return &p, err
+	).Scan(&id)
+	if err != nil {
+		return nil, err
+	}
+	return r.GetByID(ctx, userID, id)
 }
 
 func (r *ProjectRepo) Update(ctx context.Context, userID, id uuid.UUID, in model.ProjectInput) (*model.Project, error) {
@@ -94,17 +105,18 @@ func (r *ProjectRepo) Update(ctx context.Context, userID, id uuid.UUID, in model
 		color = *in.Color
 	}
 
-	var p model.Project
-	err := r.pool.QueryRow(ctx,
+	ct, err := r.pool.Exec(ctx,
 		`UPDATE projects SET name = $1, icon = $2, color = $3
-		 WHERE id = $4 AND user_id = $5
-		 RETURNING id, user_id, name, icon, color, created_at, updated_at`,
+		 WHERE id = $4 AND user_id = $5`,
 		in.Name, icon, color, id, userID,
-	).Scan(&p.ID, &p.UserID, &p.Name, &p.Icon, &p.Color, &p.CreatedAt, &p.UpdatedAt)
-	if err == pgx.ErrNoRows {
+	)
+	if err != nil {
+		return nil, err
+	}
+	if ct.RowsAffected() == 0 {
 		return nil, nil
 	}
-	return &p, err
+	return r.GetByID(ctx, userID, id)
 }
 
 func (r *ProjectRepo) Delete(ctx context.Context, userID, id uuid.UUID) error {

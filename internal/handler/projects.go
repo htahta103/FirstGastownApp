@@ -1,18 +1,28 @@
 package handler
 
 import (
+	"context"
 	"net/http"
 
 	"todoflow/internal/apierr"
 	"todoflow/internal/model"
-	"todoflow/internal/repo"
+
+	"github.com/google/uuid"
 )
 
-type ProjectHandler struct {
-	repo *repo.ProjectRepo
+type projectRepository interface {
+	List(ctx context.Context, userID uuid.UUID) ([]model.Project, error)
+	GetByID(ctx context.Context, userID, id uuid.UUID) (*model.Project, error)
+	Create(ctx context.Context, userID uuid.UUID, in model.ProjectInput) (*model.Project, error)
+	Update(ctx context.Context, userID, id uuid.UUID, in model.ProjectInput) (*model.Project, error)
+	Delete(ctx context.Context, userID, id uuid.UUID) error
 }
 
-func NewProjectHandler(r *repo.ProjectRepo) *ProjectHandler {
+type ProjectHandler struct {
+	repo projectRepository
+}
+
+func NewProjectHandler(r projectRepository) *ProjectHandler {
 	return &ProjectHandler{repo: r}
 }
 
