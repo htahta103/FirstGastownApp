@@ -553,6 +553,24 @@ paths:
           in: query
           required: true
           schema: { type: string, minLength: 1 }
+        - name: project_id
+          in: query
+          schema: { type: string, format: uuid }
+        - name: status
+          in: query
+          schema: { type: string, enum: [todo, in_progress, done] }
+        - name: priority
+          in: query
+          schema: { type: string, enum: [urgent, high, medium, low] }
+        - name: tag_id
+          in: query
+          schema: { type: string, format: uuid }
+        - name: due_from
+          in: query
+          schema: { type: string, format: date }
+        - name: due_to
+          in: query
+          schema: { type: string, format: date }
         - name: limit
           in: query
           schema: { type: integer, default: 20 }
