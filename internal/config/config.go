@@ -9,6 +9,8 @@ type Config struct {
 	DatabaseURL string
 	Port        string
 	CORSOrigin  string
+	// StaticDir, if set, serves the SPA (e.g. Vite build output) and falls back to index.html.
+	StaticDir string
 }
 
 func Load() (*Config, error) {
@@ -27,9 +29,12 @@ func Load() (*Config, error) {
 		corsOrigin = "*"
 	}
 
+	staticDir := os.Getenv("STATIC_DIR")
+
 	return &Config{
 		DatabaseURL: dbURL,
 		Port:        port,
 		CORSOrigin:  corsOrigin,
+		StaticDir:   staticDir,
 	}, nil
 }

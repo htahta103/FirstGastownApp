@@ -2,12 +2,12 @@ package main
 
 import (
 	"context"
-	"embed"
-	"io/fs"
 	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 
@@ -25,9 +25,6 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
-
-//go:embed web/*
-var webAssets embed.FS
 
 func main() {
 	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)))
@@ -95,6 +92,17 @@ func runMigrations(dbURL string) {
 		os.Exit(1)
 	}
 	slog.Info("migrations applied")
+}
+
+func resolveStaticDir(cfg *config.Config) string {
+	if cfg.StaticDir != "" {
+		return cfg.StaticDir
+	}
+	candidate := filepath.Join("web", "dist")
+	if st, err := os.Stat(filepath.Join(candidate, "index.html")); err == nil && !st.IsDir() {
+		return candidate
+	}
+	return ""
 }
 
 func newRouter(cfg *config.Config, pool *pgxpool.Pool) http.Handler {
@@ -199,22 +207,40 @@ func newRouter(cfg *config.Config, pool *pgxpool.Pool) http.Handler {
 		})
 	})
 
-	mountWebUI(r)
-	return r
-}
+	if staticRoot := resolveStaticDir(cfg); staticRoot != "" {
+		dir := http.Dir(staticRoot)
+		r.Get("/*", func(w http.ResponseWriter, r *http.Request) {
+			if strings.HasPrefix(r.URL.Path, "/api") {
+				http.NotFound(w, r)
+				return
+			}
+			rel := strings.TrimPrefix(r.URL.Path, "/")
+			if rel == "" {
+				http.ServeFile(w, r, filepath.Join(staticRoot, "index.html"))
+				return
+			}
+			f, err := dir.Open(rel)
+			if err != nil {
+				if os.IsNotExist(err) {
+					http.ServeFile(w, r, filepath.Join(staticRoot, "index.html"))
+					return
+				}
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			defer f.Close()
+			fi, err := f.Stat()
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			if fi.IsDir() {
+				http.ServeFile(w, r, filepath.Join(staticRoot, "index.html"))
+				return
+			}
+			http.ServeContent(w, r, rel, fi.ModTime(), f)
+		})
+	}
 
-func mountWebUI(r chi.Router) {
-	sub, err := fs.Sub(webAssets, "web")
-	if err != nil {
-		panic(err)
-	}
-	serve := func(name string) http.HandlerFunc {
-		return func(w http.ResponseWriter, req *http.Request) {
-			http.ServeFileFS(w, req, sub, name)
-		}
-	}
-	r.Get("/", serve("index.html"))
-	r.Get("/index.html", serve("index.html"))
-	r.Get("/styles.css", serve("styles.css"))
-	r.Get("/app.js", serve("app.js"))
+	return r
 }
