@@ -79,6 +79,29 @@ make deploy-staging
 
 See `.env.example` for required environment variables. Do not commit real secrets.
 
+Backend runtime requires these environment variables in all environments (including Fly):
+- `DATABASE_URL`
+- `PORT`
+- `CORS_ORIGIN`
+
+### Fly runtime verification (`todoflow-api.fly.dev`)
+
+After deploy, verify from your machine:
+
+```bash
+# 1) API process is reachable
+curl -fsS "https://todoflow-api.fly.dev/healthz"
+
+# 2) CORS preflight allows your frontend origin
+curl -i -X OPTIONS "https://todoflow-api.fly.dev/api/projects" \
+  -H "Origin: https://todoflow-staging.pages.dev" \
+  -H "Access-Control-Request-Method: GET"
+```
+
+Expected results:
+- `/healthz` returns `200` with `{"status":"ok"}`
+- preflight returns `2xx` and includes `access-control-allow-origin: https://todoflow-staging.pages.dev`
+
 ### Staging deploy (from your machine)
 
 `make deploy-staging` needs a staging host and public URL. Easiest setup:

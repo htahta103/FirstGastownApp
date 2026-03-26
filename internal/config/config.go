@@ -21,12 +21,12 @@ func Load() (*Config, error) {
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080"
+		return nil, fmt.Errorf("PORT is required")
 	}
 
 	corsOrigin := os.Getenv("CORS_ORIGIN")
 	if corsOrigin == "" {
-		corsOrigin = "*"
+		return nil, fmt.Errorf("CORS_ORIGIN is required")
 	}
 
 	staticDir := os.Getenv("STATIC_DIR")
