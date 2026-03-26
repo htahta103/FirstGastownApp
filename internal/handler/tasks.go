@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -183,6 +184,10 @@ func (h *TaskHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 	t, err := h.repo.Update(r.Context(), userID(r), id, in)
 	if err != nil {
+		slog.Error("task update failed",
+			"task_id", id,
+			"error", err,
+		)
 		apierr.Write(w, apierr.Internal("failed to update task"))
 		return
 	}
@@ -206,6 +211,10 @@ func (h *TaskHandler) UpdatePosition(w http.ResponseWriter, r *http.Request) {
 	}
 	t, err := h.repo.UpdatePosition(r.Context(), userID(r), id, in)
 	if err != nil {
+		slog.Error("task update position failed",
+			"task_id", id,
+			"error", err,
+		)
 		apierr.Write(w, apierr.Internal("failed to update task position"))
 		return
 	}

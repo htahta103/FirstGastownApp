@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"log/slog"
 	"net/http"
 
 	"todoflow/internal/apierr"
@@ -76,6 +77,10 @@ func (h *SubtaskHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := h.syncParent(r, taskID); err != nil {
+		slog.Error("sync parent after subtask create failed",
+			"task_id", taskID,
+			"error", err,
+		)
 		apierr.Write(w, apierr.Internal("failed to sync parent task status"))
 		return
 	}
@@ -125,6 +130,11 @@ func (h *SubtaskHandler) Toggle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := h.syncParent(r, s.TaskID); err != nil {
+		slog.Error("sync parent after subtask toggle failed",
+			"task_id", s.TaskID,
+			"subtask_id", s.ID,
+			"error", err,
+		)
 		apierr.Write(w, apierr.Internal("failed to sync parent task status"))
 		return
 	}
@@ -147,6 +157,10 @@ func (h *SubtaskHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := h.syncParent(r, taskID); err != nil {
+		slog.Error("sync parent after subtask delete failed",
+			"task_id", taskID,
+			"error", err,
+		)
 		apierr.Write(w, apierr.Internal("failed to sync parent task status"))
 		return
 	}
