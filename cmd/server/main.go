@@ -126,8 +126,8 @@ func newRouter(cfg *config.Config, pool *pgxpool.Pool) http.Handler {
 	taskRepo := repo.NewTaskRepo(pool)
 	subtaskRepo := repo.NewSubtaskRepo(pool)
 	tagRepo := repo.NewTagRepo(pool)
-	dashboardRepo := repo.NewDashboardRepo(pool)
-	searchRepo := repo.NewSearchRepo(pool)
+	dashboardRepo := repo.NewDashboardRepo(pool, taskRepo)
+	searchRepo := repo.NewSearchRepo(pool, taskRepo)
 	filterRepo := repo.NewFilterRepo(pool)
 
 	users := handler.NewUserHandler(userRepo)

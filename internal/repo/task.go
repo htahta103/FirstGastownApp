@@ -429,6 +429,23 @@ func (r *TaskRepo) ExistsForUser(ctx context.Context, userID, taskID uuid.UUID) 
 // - If the task has subtasks and all are completed, status becomes done.
 // - If any subtask is incomplete and status was done, status becomes in_progress.
 // - Tasks with no subtasks are unchanged.
+// EnrichTasks loads subtask counts and tags for tasks in bulk (same as List/Get).
+func (r *TaskRepo) EnrichTasks(ctx context.Context, tasks []model.Task) error {
+	if len(tasks) == 0 {
+		return nil
+	}
+	taskIDs := make([]uuid.UUID, len(tasks))
+	taskMap := make(map[uuid.UUID]*model.Task, len(tasks))
+	for i := range tasks {
+		taskIDs[i] = tasks[i].ID
+		taskMap[tasks[i].ID] = &tasks[i]
+	}
+	if err := r.loadSubtaskCounts(ctx, taskMap, taskIDs); err != nil {
+		return err
+	}
+	return r.loadTags(ctx, taskMap, taskIDs)
+}
+
 func (r *TaskRepo) SyncStatusWithSubtasks(ctx context.Context, userID, taskID uuid.UUID) error {
 	var total, completed int
 	err := r.pool.QueryRow(ctx,

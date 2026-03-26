@@ -10,11 +10,12 @@ import (
 )
 
 type DashboardRepo struct {
-	pool *pgxpool.Pool
+	pool  *pgxpool.Pool
+	tasks *TaskRepo
 }
 
-func NewDashboardRepo(pool *pgxpool.Pool) *DashboardRepo {
-	return &DashboardRepo{pool: pool}
+func NewDashboardRepo(pool *pgxpool.Pool, tasks *TaskRepo) *DashboardRepo {
+	return &DashboardRepo{pool: pool, tasks: tasks}
 }
 
 func (r *DashboardRepo) Get(ctx context.Context, userID uuid.UUID) (*model.Dashboard, error) {
@@ -124,7 +125,6 @@ func (r *DashboardRepo) Get(ctx context.Context, userID uuid.UUID) (*model.Dashb
 			&t.CreatedAt, &t.UpdatedAt); err != nil {
 			return nil, err
 		}
-		t.Tags = []model.Tag{}
 		d.UpcomingDeadlines = append(d.UpcomingDeadlines, t)
 	}
 	if err := dlRows.Err(); err != nil {
@@ -132,6 +132,9 @@ func (r *DashboardRepo) Get(ctx context.Context, userID uuid.UUID) (*model.Dashb
 	}
 	if d.UpcomingDeadlines == nil {
 		d.UpcomingDeadlines = []model.Task{}
+	}
+	if err := r.tasks.EnrichTasks(ctx, d.UpcomingDeadlines); err != nil {
+		return nil, err
 	}
 
 	return d, nil

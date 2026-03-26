@@ -10,11 +10,12 @@ import (
 )
 
 type SearchRepo struct {
-	pool *pgxpool.Pool
+	pool  *pgxpool.Pool
+	tasks *TaskRepo
 }
 
-func NewSearchRepo(pool *pgxpool.Pool) *SearchRepo {
-	return &SearchRepo{pool: pool}
+func NewSearchRepo(pool *pgxpool.Pool, tasks *TaskRepo) *SearchRepo {
+	return &SearchRepo{pool: pool, tasks: tasks}
 }
 
 func (r *SearchRepo) Search(ctx context.Context, userID uuid.UUID, query string, limit int) ([]model.Task, error) {
@@ -41,11 +42,16 @@ func (r *SearchRepo) Search(ctx context.Context, userID uuid.UUID, query string,
 			&t.CreatedAt, &t.UpdatedAt); err != nil {
 			return nil, err
 		}
-		t.Tags = []model.Tag{}
 		tasks = append(tasks, t)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
 	}
 	if tasks == nil {
 		tasks = []model.Task{}
 	}
-	return tasks, rows.Err()
+	if err := r.tasks.EnrichTasks(ctx, tasks); err != nil {
+		return nil, err
+	}
+	return tasks, nil
 }
