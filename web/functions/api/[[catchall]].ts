@@ -6,6 +6,7 @@
  */
 interface Env {
   TODFLOW_API_ORIGIN?: string;
+  TODOFLOW_API_ORIGIN?: string;
 }
 
 function jsonErr(message: string, status: number): Response {
@@ -30,10 +31,10 @@ function normalizeOrigin(raw: string | undefined): string | null {
 
 export async function onRequest(context: { request: Request; env: Env }): Promise<Response> {
   const { request, env } = context;
-  const base = normalizeOrigin(env.TODFLOW_API_ORIGIN);
+  const base = normalizeOrigin(env.TODFLOW_API_ORIGIN ?? env.TODOFLOW_API_ORIGIN);
   if (!base) {
     return jsonErr(
-      "TodoFlow API proxy is not configured: set TODFLOW_API_ORIGIN on the Pages project.",
+      "TodoFlow API proxy is not configured: set TODFLOW_API_ORIGIN (or TODOFLOW_API_ORIGIN) on the Pages project.",
       503,
     );
   }

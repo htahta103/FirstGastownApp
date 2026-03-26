@@ -55,4 +55,4 @@ Static assets are served from Pages. **`/api/*`** is handled by a [Pages Functio
 ## Known limitations vs production
 
 - **`TODFLOW_API_ORIGIN`** must point at a deployed API; the Pages project does not run Postgres or Go.
-- No application `/healthz` on Pages (static HTML/JS only); health checks for the API belong on the API host when it is deployed.
+- `/healthz` is served by a Pages Function (`web/functions/healthz.ts`) and returns a small JSON payload (and whether the API proxy env var is configured).

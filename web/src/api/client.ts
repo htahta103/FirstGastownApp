@@ -3,7 +3,8 @@ import type { ApiErrorBody, Project, Subtask, Tag, Task, TaskListResult } from "
 const USER_KEY = "todoflow_user_id";
 
 function resolveApiUrl(path: string): string {
-  const base = (import.meta as any)?.env?.VITE_API_BASE_URL as string | undefined;
+  const viteEnv = import.meta.env as unknown as { VITE_API_BASE_URL?: string };
+  const base = viteEnv.VITE_API_BASE_URL;
   if (!base) return path;
   try {
     // path is typically "/api/..." and base should be an origin like "https://xyz.workers.dev"
