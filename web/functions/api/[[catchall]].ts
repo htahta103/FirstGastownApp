@@ -1,12 +1,9 @@
-/**
- * Proxies /api/* to the staging/production API origin so Cloudflare Pages can serve
- * the SPA while same-origin fetch("/api/...") hits the Go backend.
- *
- * Bind TODFLOW_API_ORIGIN in the Pages project (e.g. https://staging.example.com — no path, no trailing slash).
- */
-interface Env {
+import type { PagesFunction } from "../_types";
+
+type Env = {
   TODFLOW_API_ORIGIN?: string;
-}
+  TODOFLOW_API_ORIGIN?: string;
+};
 
 function jsonErr(message: string, status: number): Response {
   return new Response(JSON.stringify({ error: { message } }), {
@@ -15,8 +12,7 @@ function jsonErr(message: string, status: number): Response {
   });
 }
 
-function normalizeOrigin(raw: string | undefined): string | null {
-  if (!raw) return null;
+function normalizeOrigin(raw: string): string | null {
   const t = raw.trim().replace(/\/$/, "");
   if (!t) return null;
   try {
@@ -28,20 +24,30 @@ function normalizeOrigin(raw: string | undefined): string | null {
   }
 }
 
-export async function onRequest(context: { request: Request; env: Env }): Promise<Response> {
-  const { request, env } = context;
-  const base = normalizeOrigin(env.TODFLOW_API_ORIGIN);
-  if (!base) {
-    return jsonErr(
-      "TodoFlow API proxy is not configured: set TODFLOW_API_ORIGIN on the Pages project.",
-      503,
-    );
+const DEFAULT_API_ORIGIN = "https://todoflow-api-staging.htahta103.workers.dev";
+
+export const onRequest: PagesFunction<Env> = async (context) => {
+  const envOrigin = context.env.TODFLOW_API_ORIGIN ?? context.env.TODOFLOW_API_ORIGIN;
+  const apiOrigin = envOrigin ? normalizeOrigin(envOrigin) : DEFAULT_API_ORIGIN;
+  if (!apiOrigin) {
+    return jsonErr("Invalid API origin. Set TODFLOW_API_ORIGIN (or TODOFLOW_API_ORIGIN).", 503);
   }
 
-  const src = new URL(request.url);
-  const destUrl = `${base}${src.pathname}${src.search}`;
+  const url = new URL(context.request.url);
+  const upstreamUrl = new URL(apiOrigin);
+  upstreamUrl.pathname = url.pathname;
+  upstreamUrl.search = url.search;
 
-  const forward = new Request(destUrl, request);
-  const res = await fetch(forward);
-  return res;
-}
+  const headers = new Headers(context.request.headers);
+  headers.delete("host");
+
+  const method = context.request.method.toUpperCase();
+  const upstreamReq = new Request(upstreamUrl.toString(), {
+    method,
+    headers,
+    body: method === "GET" || method === "HEAD" ? undefined : context.request.body,
+    redirect: "manual",
+  });
+
+  return fetch(upstreamReq);
+};
