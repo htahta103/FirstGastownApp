@@ -5,6 +5,22 @@ import type {
   TaskFilter,
 } from '../types'
 
+function apiBaseUrl(): string | undefined {
+  const base = (import.meta as any)?.env?.VITE_API_BASE_URL as string | undefined
+  return base && base.trim() ? base : undefined
+}
+
+function resolveApiUrl(path: string): string {
+  const base = apiBaseUrl()
+  const fullPath = `/api${path}`
+  if (!base) return fullPath
+  try {
+    return new URL(fullPath, base).toString()
+  } catch {
+    return fullPath
+  }
+}
+
 function getUserId(): string {
   let id = localStorage.getItem('todoflow-user-id')
   if (!id) {
@@ -15,7 +31,7 @@ function getUserId(): string {
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const res = await fetch(`/api${path}`, {
+  const res = await fetch(resolveApiUrl(path), {
     ...options,
     headers: {
       'Content-Type': 'application/json',

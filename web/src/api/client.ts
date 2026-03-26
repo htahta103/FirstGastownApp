@@ -2,6 +2,18 @@ import type { ApiErrorBody, Project, Subtask, Tag, Task, TaskListResult } from "
 
 const USER_KEY = "todoflow_user_id";
 
+function resolveApiUrl(path: string): string {
+  const base = (import.meta as any)?.env?.VITE_API_BASE_URL as string | undefined;
+  if (!base) return path;
+  try {
+    // path is typically "/api/..." and base should be an origin like "https://xyz.workers.dev"
+    // (or "http://localhost:8080"). URL() handles slash joining safely.
+    return new URL(path, base).toString();
+  } catch {
+    return path;
+  }
+}
+
 export function getOrCreateUserId(): string {
   let id = localStorage.getItem(USER_KEY);
   if (!id) {
@@ -40,7 +52,7 @@ export function createApi(userId: string) {
     const controller = new AbortController();
     const timeoutId = window.setTimeout(() => controller.abort(), DEFAULT_REQUEST_TIMEOUT_MS);
     try {
-      const res = await fetch(path, {
+      const res = await fetch(resolveApiUrl(path), {
         ...init,
         signal: controller.signal,
         headers: { ...headers, ...init?.headers },
