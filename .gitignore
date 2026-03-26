@@ -1,5 +1,7 @@
 .env
 deploy/.env
+.env.staging
+deploy/.env.staging
 
 .runtime/
 .claude/

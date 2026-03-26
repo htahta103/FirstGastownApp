@@ -66,6 +66,7 @@ make test
 make lint
 make dev
 make prod
+make deploy-staging
 ```
 
 `make lint` uses **golangci-lint** when installed; otherwise it falls back to `go vet ./...`. CI always runs golangci-lint.
@@ -73,3 +74,13 @@ make prod
 ## Configuration
 
 See `.env.example` for required environment variables. Do not commit real secrets.
+
+### Staging deploy (from your machine)
+
+`make deploy-staging` needs a staging host and public URL. Easiest setup:
+
+```bash
+cp deploy/env.staging.example .env.staging
+# edit .env.staging
+make deploy-staging
+```

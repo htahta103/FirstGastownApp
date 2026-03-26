@@ -13,6 +13,9 @@ set -euo pipefail
 #   HEALTH_PATH         - default: /healthz
 #   ROOT_PATH           - default: /
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+
 DEPLOY_HOST_STAGING="${DEPLOY_HOST_STAGING:-}"
 STAGING_URL="${STAGING_URL:-}"
 
@@ -21,13 +24,34 @@ DEPLOY_PATH="${DEPLOY_PATH:-/opt/todoflow}"
 HEALTH_PATH="${HEALTH_PATH:-/healthz}"
 ROOT_PATH="${ROOT_PATH:-/}"
 
+STAGING_ENV_FILE="${STAGING_ENV_FILE:-}"
+if [[ -z "${STAGING_ENV_FILE}" ]]; then
+  for candidate in "${REPO_ROOT}/.env.staging" "${REPO_ROOT}/deploy/.env.staging"; do
+    if [[ -f "${candidate}" ]]; then
+      STAGING_ENV_FILE="${candidate}"
+      break
+    fi
+  done
+fi
+
+if [[ (-z "${DEPLOY_HOST_STAGING}" || -z "${STAGING_URL}") && -n "${STAGING_ENV_FILE}" ]]; then
+  set -a
+  # shellcheck disable=SC1090
+  source "${STAGING_ENV_FILE}"
+  set +a
+  DEPLOY_HOST_STAGING="${DEPLOY_HOST_STAGING:-}"
+  STAGING_URL="${STAGING_URL:-}"
+fi
+
 if [[ -z "${DEPLOY_HOST_STAGING}" ]]; then
-  echo "error: set DEPLOY_HOST_STAGING (or put it in ./deploy/staging.env)" >&2
+  echo "error: set DEPLOY_HOST_STAGING" >&2
+  echo "hint: create .env.staging (or deploy/.env.staging) from deploy/env.staging.example" >&2
   exit 1
 fi
 
 if [[ -z "${STAGING_URL}" ]]; then
-  echo "error: set STAGING_URL (include scheme), e.g. https://staging.example.com (or put it in ./deploy/staging.env)" >&2
+  echo "error: set STAGING_URL (include scheme), e.g. https://staging.example.com" >&2
+  echo "hint: create .env.staging (or deploy/.env.staging) from deploy/env.staging.example" >&2
   exit 1
 fi
 
