@@ -50,7 +50,7 @@ function positionBetween(beforePos: number | null, afterPos: number | null): num
 }
 
 export default function App() {
-  const userId = useMemo(() => getOrCreateUserId(), []);
+  const [userId, setUserId] = useState(() => getOrCreateUserId());
   const api = useMemo(() => createApi(userId), [userId]);
 
   const [ready, setReady] = useState(false);
@@ -155,7 +155,12 @@ export default function App() {
     let cancelled = false;
     (async () => {
       try {
-        await api.ensureUser();
+        const u = await api.ensureUser();
+        if (u?.id && u.id !== userId) {
+          localStorage.setItem("todoflow_user_id", u.id);
+          setUserId(u.id);
+          return;
+        }
         if (cancelled) return;
         await refreshProjects();
         if (cancelled) return;
@@ -179,7 +184,7 @@ export default function App() {
     return () => {
       cancelled = true;
     };
-  }, [api, refreshProjects, refreshTags]);
+  }, [api, refreshProjects, refreshTags, userId]);
 
   const retryConnection = useCallback(() => {
     setBootError(null);
@@ -187,7 +192,12 @@ export default function App() {
     setReady(false);
     void (async () => {
       try {
-        await api.ensureUser();
+        const u = await api.ensureUser();
+        if (u?.id && u.id !== userId) {
+          localStorage.setItem("todoflow_user_id", u.id);
+          setUserId(u.id);
+          return;
+        }
         await refreshProjects();
         await refreshTags();
         setBackendUnavailable(false);
@@ -202,7 +212,7 @@ export default function App() {
         setReady(true);
       }
     })();
-  }, [api, refreshProjects, refreshTags]);
+  }, [api, refreshProjects, refreshTags, userId]);
 
   useEffect(() => {
     if (!ready) return;

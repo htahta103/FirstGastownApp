@@ -75,7 +75,7 @@ export function createApi(userId: string) {
   }
 
   return {
-    ensureUser: () => request<unknown>("/api/users", { method: "POST" }),
+    ensureUser: () => request<{ id?: string }>("/api/users", { method: "POST", body: "{}" }),
 
     listProjects: () => request<Project[]>("/api/projects"),
 
