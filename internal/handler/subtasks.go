@@ -19,8 +19,8 @@ func NewSubtaskHandler(sub *repo.SubtaskRepo, tasks *repo.TaskRepo) *SubtaskHand
 	return &SubtaskHandler{subtasks: sub, tasks: tasks}
 }
 
-func (h *SubtaskHandler) syncParent(r *http.Request, taskID uuid.UUID) {
-	_ = h.tasks.SyncStatusWithSubtasks(r.Context(), userID(r), taskID)
+func (h *SubtaskHandler) syncParent(r *http.Request, taskID uuid.UUID) error {
+	return h.tasks.SyncStatusWithSubtasks(r.Context(), userID(r), taskID)
 }
 
 func (h *SubtaskHandler) List(w http.ResponseWriter, r *http.Request) {
@@ -75,7 +75,10 @@ func (h *SubtaskHandler) Create(w http.ResponseWriter, r *http.Request) {
 		apierr.Write(w, apierr.Internal("failed to create subtask"))
 		return
 	}
-	h.syncParent(r, taskID)
+	if err := h.syncParent(r, taskID); err != nil {
+		apierr.Write(w, apierr.Internal("failed to sync parent task status"))
+		return
+	}
 	writeJSON(w, http.StatusCreated, s)
 }
 
@@ -121,7 +124,10 @@ func (h *SubtaskHandler) Toggle(w http.ResponseWriter, r *http.Request) {
 		apierr.Write(w, apierr.NotFound("subtask"))
 		return
 	}
-	h.syncParent(r, s.TaskID)
+	if err := h.syncParent(r, s.TaskID); err != nil {
+		apierr.Write(w, apierr.Internal("failed to sync parent task status"))
+		return
+	}
 	writeJSON(w, http.StatusOK, s)
 }
 
@@ -140,6 +146,9 @@ func (h *SubtaskHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		apierr.Write(w, apierr.NotFound("subtask"))
 		return
 	}
-	h.syncParent(r, taskID)
+	if err := h.syncParent(r, taskID); err != nil {
+		apierr.Write(w, apierr.Internal("failed to sync parent task status"))
+		return
+	}
 	w.WriteHeader(http.StatusNoContent)
 }

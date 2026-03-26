@@ -355,8 +355,12 @@ func (r *TaskRepo) Update(ctx context.Context, userID, id uuid.UUID, in model.Ta
 
 	taskMap := map[uuid.UUID]*model.Task{t.ID: &t}
 	ids := []uuid.UUID{t.ID}
-	_ = r.loadSubtaskCounts(ctx, taskMap, ids)
-	_ = r.loadTags(ctx, taskMap, ids)
+	if err := r.loadSubtaskCounts(ctx, taskMap, ids); err != nil {
+		return nil, err
+	}
+	if err := r.loadTags(ctx, taskMap, ids); err != nil {
+		return nil, err
+	}
 	return &t, nil
 }
 
@@ -390,8 +394,12 @@ func (r *TaskRepo) UpdatePosition(ctx context.Context, userID, id uuid.UUID, in 
 
 	taskMap := map[uuid.UUID]*model.Task{t.ID: &t}
 	ids := []uuid.UUID{t.ID}
-	_ = r.loadSubtaskCounts(ctx, taskMap, ids)
-	_ = r.loadTags(ctx, taskMap, ids)
+	if err := r.loadSubtaskCounts(ctx, taskMap, ids); err != nil {
+		return nil, err
+	}
+	if err := r.loadTags(ctx, taskMap, ids); err != nil {
+		return nil, err
+	}
 	return &t, nil
 }
 
