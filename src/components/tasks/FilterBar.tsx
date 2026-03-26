@@ -53,11 +53,14 @@ export function FilterBar({
   onChange,
   projects,
   tags,
+  calendarMode = false,
 }: {
   state: TaskListFilterState
   onChange: (next: TaskListFilterState) => void
   projects: Project[]
   tags: Tag[]
+  /** Hide due + sort; calendar grid supplies the date range. */
+  calendarMode?: boolean
 }) {
   const qc = useQueryClient()
   const [saveOpen, setSaveOpen] = useState(false)
@@ -116,13 +119,14 @@ export function FilterBar({
     onChange(taskFilterToFilterState(parsed))
   }
 
-  const isDefaultState =
-    !state.project_id &&
-    !state.status &&
-    !state.priority &&
-    !state.tag_id &&
-    state.duePreset === 'any' &&
-    state.sort === 'position'
+  const isDefaultState = calendarMode
+    ? !state.project_id && !state.status && !state.priority && !state.tag_id
+    : !state.project_id &&
+      !state.status &&
+      !state.priority &&
+      !state.tag_id &&
+      state.duePreset === 'any' &&
+      state.sort === 'position'
 
   return (
     <div className="space-y-5">
@@ -133,7 +137,9 @@ export function FilterBar({
               Filters
             </h2>
             <p className="mt-0.5 text-xs text-slate-600 dark:text-gray-500">
-              Combine project, status, priority, tag, and due date. All apply together.
+              {calendarMode
+                ? 'Project, status, priority, and tag apply to tasks shown on the calendar. Due range comes from the visible month or week.'
+                : 'Combine project, status, priority, tag, and due date. All apply together.'}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -183,23 +189,27 @@ export function FilterBar({
             value={state.tag_id}
             onChange={(e) => onChange({ ...state, tag_id: e.target.value })}
           />
-          <Select
-            label="Due date"
-            options={dueOptions}
-            value={state.duePreset}
-            onChange={(e) => setDuePreset(e.target.value as DuePreset)}
-          />
-          <Select
-            label="Sort"
-            options={sortOptions}
-            value={state.sort}
-            onChange={(e) =>
-              onChange({ ...state, sort: e.target.value as TaskListFilterState['sort'] })
-            }
-          />
+          {!calendarMode && (
+            <>
+              <Select
+                label="Due date"
+                options={dueOptions}
+                value={state.duePreset}
+                onChange={(e) => setDuePreset(e.target.value as DuePreset)}
+              />
+              <Select
+                label="Sort"
+                options={sortOptions}
+                value={state.sort}
+                onChange={(e) =>
+                  onChange({ ...state, sort: e.target.value as TaskListFilterState['sort'] })
+                }
+              />
+            </>
+          )}
         </div>
 
-        {state.duePreset === 'custom' && (
+        {!calendarMode && state.duePreset === 'custom' && (
           <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Input
               label="From"

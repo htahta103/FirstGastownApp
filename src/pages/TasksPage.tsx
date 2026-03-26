@@ -1,27 +1,35 @@
 import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router-dom'
-import { listProjects, listTags, listTasks } from '../api/client'
+import { addMonths, addWeeks } from 'date-fns'
+import { listProjects, listTags, listTasks, listTasksCalendar } from '../api/client'
 import type { Project } from '../types'
 import { PageTransition } from '../components/layout/PageTransition'
+import { TaskCalendarView } from '../components/tasks/TaskCalendarView'
 import { FilterBar } from '../components/tasks/FilterBar'
 import { TaskBoardView } from '../components/tasks/TaskBoardView'
 import { TaskListView } from '../components/tasks/TaskListView'
 import { TaskQuickView } from '../components/tasks/TaskQuickView'
 import { Skeleton } from '../components/ui'
+import type { CalendarGrain } from '../lib/calendarGrid'
+import { getCalendarGrid } from '../lib/calendarGrid'
 import {
   defaultTaskListFilterState,
   filterStateToApi,
   filterStateToBoardApi,
+  filterStateToCalendarApi,
   type TaskListFilterState,
 } from '../lib/taskFilterHelpers'
 
-type TasksViewMode = 'list' | 'board'
+type TasksViewMode = 'list' | 'board' | 'calendar'
 
 export function TasksPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const taskId = searchParams.get('task')
-  const view: TasksViewMode = searchParams.get('view') === 'board' ? 'board' : 'list'
+
+  const rawView = searchParams.get('view')
+  const view: TasksViewMode =
+    rawView === 'board' ? 'board' : rawView === 'calendar' ? 'calendar' : 'list'
 
   const setView = (v: TasksViewMode) => {
     setSearchParams(
@@ -36,6 +44,9 @@ export function TasksPage() {
 
   const [filterState, setFilterState] = useState<TaskListFilterState>(() => defaultTaskListFilterState())
 
+  const [calCursor, setCalCursor] = useState(() => new Date())
+  const [calGrain, setCalGrain] = useState<CalendarGrain>('month')
+
   const listApiFilter = useMemo(() => filterStateToApi(filterState), [filterState])
   const boardApiFilter = useMemo(() => filterStateToBoardApi(filterState), [filterState])
   const activeFilter = view === 'board' ? boardApiFilter : listApiFilter
@@ -45,6 +56,21 @@ export function TasksPage() {
   const tasksQ = useQuery({
     queryKey: [...queryKey],
     queryFn: () => listTasks(activeFilter),
+    enabled: view === 'list' || view === 'board',
+  })
+
+  const calendarExtra = useMemo(() => filterStateToCalendarApi(filterState), [filterState])
+  const gridInfo = useMemo(() => getCalendarGrid(calCursor, calGrain), [calCursor, calGrain])
+
+  const calendarQ = useQuery({
+    queryKey: ['tasks', 'calendar', gridInfo.apiFrom, gridInfo.apiTo, calendarExtra],
+    queryFn: () =>
+      listTasksCalendar({
+        from: gridInfo.apiFrom,
+        to: gridInfo.apiTo,
+        ...calendarExtra,
+      }),
+    enabled: view === 'calendar',
   })
 
   const projectsQ = useQuery({ queryKey: ['projects'], queryFn: listProjects })
@@ -71,6 +97,13 @@ export function TasksPage() {
   const tasks = tasksQ.data?.tasks ?? []
   const total = tasksQ.data?.total ?? 0
 
+  const onCalendarPrev = () => {
+    setCalCursor((d) => (calGrain === 'month' ? addMonths(d, -1) : addWeeks(d, -1)))
+  }
+  const onCalendarNext = () => {
+    setCalCursor((d) => (calGrain === 'month' ? addMonths(d, 1) : addWeeks(d, 1)))
+  }
+
   return (
     <PageTransition>
       <div className="p-6 sm:p-8">
@@ -80,11 +113,13 @@ export function TasksPage() {
               Tasks
             </h1>
             <p className="mt-2 max-w-2xl text-sm text-slate-600 dark:text-gray-400">
-              {view === 'board'
-                ? 'Board shows Todo · In progress · Done. Status filter applies to list view only.'
-                : 'Filter tasks, edit inline, or open details. Press '}
+              {view === 'board' &&
+                'Board shows Todo · In progress · Done. Status filter applies to list view only.'}
+              {view === 'calendar' &&
+                'Calendar loads tasks by due date for the visible range. Use filters to narrow projects, status, priority, and tags.'}
               {view === 'list' && (
                 <>
+                  Filter tasks, edit inline, or open details. Press{' '}
                   <kbd className="rounded border border-slate-300/90 bg-white px-1.5 py-0.5 font-mono text-xs text-slate-800 dark:border-white/15 dark:bg-white/10 dark:text-gray-200">
                     ⌘
                   </kbd>
@@ -119,6 +154,17 @@ export function TasksPage() {
             >
               Board
             </button>
+            <button
+              type="button"
+              onClick={() => setView('calendar')}
+              className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                view === 'calendar'
+                  ? 'bg-violet-500/20 text-violet-200'
+                  : 'text-slate-600 hover:text-slate-900 dark:text-gray-500 dark:hover:text-gray-200'
+              }`}
+            >
+              Calendar
+            </button>
           </div>
         </div>
 
@@ -130,11 +176,17 @@ export function TasksPage() {
             onChange={setFilterState}
             projects={projectsQ.data ?? []}
             tags={tagsQ.data ?? []}
+            calendarMode={view === 'calendar'}
           />
         )}
 
-        <section className="mt-8" aria-label={view === 'list' ? 'Task list' : 'Task board'}>
-          {view === 'list' ? (
+        <section
+          className="mt-8"
+          aria-label={
+            view === 'list' ? 'Task list' : view === 'board' ? 'Task board' : 'Task calendar'
+          }
+        >
+          {view === 'list' && (
             <TaskListView
               tasks={tasks}
               total={total}
@@ -146,7 +198,8 @@ export function TasksPage() {
               queryKey={[...queryKey]}
               onOpenTask={openTask}
             />
-          ) : (
+          )}
+          {view === 'board' && (
             <TaskBoardView
               tasks={tasks}
               isLoading={tasksQ.isLoading}
@@ -156,10 +209,31 @@ export function TasksPage() {
               queryKey={queryKey}
             />
           )}
+          {view === 'calendar' && (
+            <TaskCalendarView
+              grain={calGrain}
+              onGrainChange={(g) => setCalGrain(g)}
+              cursor={calCursor}
+              onPrev={onCalendarPrev}
+              onNext={onCalendarNext}
+              onToday={() => setCalCursor(new Date())}
+              gridDays={gridInfo.days}
+              focusAnchor={gridInfo.focusMonth}
+              data={calendarQ.data}
+              isLoading={calendarQ.isLoading}
+              isError={calendarQ.isError}
+              error={calendarQ.error as Error | null}
+              onRetry={() => void calendarQ.refetch()}
+              onOpenTask={openTask}
+            />
+          )}
         </section>
       </div>
 
-      <TaskQuickView taskId={taskId} onClose={closeTask} />
+      <TaskQuickView
+        taskId={taskId}
+        onClose={closeTask}
+      />
     </PageTransition>
   )
 }

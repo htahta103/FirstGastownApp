@@ -1,6 +1,6 @@
 import type {
   Project, ProjectInput, Task, TaskInput, TaskUpdate,
-  PositionUpdate, TaskListResult, Subtask, SubtaskInput,
+  PositionUpdate, TaskListResult, TaskCalendarResult, Subtask, SubtaskInput,
   Tag, TagInput, Dashboard, SavedFilter, SavedFilterInput,
   TaskFilter,
 } from '../types'
@@ -54,6 +54,24 @@ export const listTasks = (filter?: TaskFilter) => {
   }
   const qs = params.toString()
   return request<TaskListResult>(`/tasks${qs ? `?${qs}` : ''}`)
+}
+
+export type TaskCalendarQuery = {
+  from: string
+  to: string
+  project_id?: string
+  status?: string
+  priority?: string
+  tag_id?: string
+}
+
+export const listTasksCalendar = (q: TaskCalendarQuery) => {
+  const params = new URLSearchParams({ from: q.from, to: q.to })
+  if (q.project_id) params.set('project_id', q.project_id)
+  if (q.status) params.set('status', q.status)
+  if (q.priority) params.set('priority', q.priority)
+  if (q.tag_id) params.set('tag_id', q.tag_id)
+  return request<TaskCalendarResult>(`/tasks/calendar?${params}`)
 }
 export const getTask = (id: string) => request<Task>(`/tasks/${id}`)
 export const createTask = (input: TaskInput) =>

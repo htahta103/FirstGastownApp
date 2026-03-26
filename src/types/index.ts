@@ -58,6 +58,18 @@ export interface TaskListResult {
   total: number
 }
 
+export interface TaskCalendarDay {
+  date: string
+  tasks: Task[]
+}
+
+export interface TaskCalendarResult {
+  from: string
+  to: string
+  days: TaskCalendarDay[]
+  total: number
+}
+
 export interface Subtask {
   id: string
   task_id: string

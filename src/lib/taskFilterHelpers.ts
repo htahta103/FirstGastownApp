@@ -101,6 +101,18 @@ export function filterStateToBoardApi(s: TaskListFilterState): TaskFilter {
   })
 }
 
+/** Calendar API query params (no due range — visible grid defines from/to). */
+export function filterStateToCalendarApi(
+  s: TaskListFilterState,
+): Pick<TaskFilter, 'project_id' | 'status' | 'priority' | 'tag_id'> {
+  const out: Pick<TaskFilter, 'project_id' | 'status' | 'priority' | 'tag_id'> = {}
+  if (s.project_id) out.project_id = s.project_id
+  if (s.status) out.status = s.status
+  if (s.priority) out.priority = s.priority
+  if (s.tag_id) out.tag_id = s.tag_id
+  return out
+}
+
 export function taskFilterToFilterState(f: TaskFilter): TaskListFilterState {
   const { preset, custom } = detectDuePreset(f)
   const sort = SORTS.includes(f.sort as TaskSort) ? (f.sort as TaskSort) : 'position'
