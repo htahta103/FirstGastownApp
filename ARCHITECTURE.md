@@ -74,7 +74,7 @@ See `schema.sql` for the full DDL. Entity summary:
 
 - **`position` columns** (float64) on tasks and subtasks enable drag-and-drop reordering without rewriting all rows. Rebalance when gap shrinks below threshold.
 - **Cascading deletes**: deleting a project cascades to its tasks, which cascade to subtasks and task_tags. This is the simplest UX — the PRD doesn't mention project-to-project task transfer.
-- **`status` is authoritative**: subtask completion does not auto-set task status. The user explicitly moves tasks between Todo/In Progress/Done.
+- **`status` is mostly user-driven, with subtask sync**: users can move tasks between Todo/In Progress/Done, but subtask completion also syncs parent status (all subtasks completed → `done`; any incomplete can downgrade `done` → `in_progress`).
 - **`description` stored as plain text**: avoids XSS surface. Frontend can render markdown if desired.
 
 ## 3. API Surface Overview
