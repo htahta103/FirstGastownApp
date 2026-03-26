@@ -22,12 +22,12 @@ HEALTH_PATH="${HEALTH_PATH:-/healthz}"
 ROOT_PATH="${ROOT_PATH:-/}"
 
 if [[ -z "${DEPLOY_HOST_STAGING}" ]]; then
-  echo "error: set DEPLOY_HOST_STAGING" >&2
+  echo "error: set DEPLOY_HOST_STAGING (or put it in ./deploy/staging.env)" >&2
   exit 1
 fi
 
 if [[ -z "${STAGING_URL}" ]]; then
-  echo "error: set STAGING_URL (include scheme), e.g. https://staging.example.com" >&2
+  echo "error: set STAGING_URL (include scheme), e.g. https://staging.example.com (or put it in ./deploy/staging.env)" >&2
   exit 1
 fi
 

@@ -27,8 +27,9 @@ prod:
 
 deploy-staging:
 	@echo "Deploying to staging..."
-	@DEPLOY_HOST_STAGING="$${DEPLOY_HOST_STAGING:-}" STAGING_URL="$${STAGING_URL:-}" \
-		bash ./deploy/scripts/deploy-staging.sh
+	@bash -lc 'set -a; [[ -f ./deploy/staging.env ]] && source ./deploy/staging.env; set +a; \
+		DEPLOY_HOST_STAGING="$${DEPLOY_HOST_STAGING:-}" STAGING_URL="$${STAGING_URL:-}" \
+		bash ./deploy/scripts/deploy-staging.sh'
 
 deploy-prod:
 	@echo "TODO: implement prod deploy (CI/CD + VPS/registry)"

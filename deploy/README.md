@@ -50,6 +50,19 @@ export DEPLOY_PATH=/opt/todoflow   # optional
 
 Requires `rsync` and `ssh`. Does **not** overwrite remote `deploy/.env`.
 
+## 6. Staging deploy (from your machine)
+
+Staging deploy uses the same rsync+ssh flow, but also validates the public URL
+via `curl` and writes a local `STAGING.md` after successful health checks.
+
+Create a local-only env file (do not commit it):
+
+```bash
+cp deploy/staging.env.example deploy/staging.env
+$EDITOR deploy/staging.env
+make deploy-staging
+```
+
 ## 6. Backups
 
 ```bash
