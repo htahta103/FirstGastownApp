@@ -55,6 +55,9 @@ export default function App() {
 
   const [ready, setReady] = useState(false);
   const [bootError, setBootError] = useState<string | null>(null);
+  /** True when /api is unreachable — show full UI with empty data + notice (e.g. Cloudflare Pages). */
+  const [backendUnavailable, setBackendUnavailable] = useState(false);
+  const [backendNotice, setBackendNotice] = useState<string | null>(null);
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
@@ -104,12 +107,16 @@ export default function App() {
   }, [api]);
 
   const refreshTasks = useCallback(async () => {
-    if (nav.kind === "project") {
-      const res = await api.listTasks({ project_id: nav.projectId, sort: "position" });
-      setRawTasks(res.tasks);
-    } else {
-      const res = await api.listTasks({ sort: "due_date", limit: "500" });
-      setRawTasks(res.tasks);
+    try {
+      if (nav.kind === "project") {
+        const res = await api.listTasks({ project_id: nav.projectId, sort: "position" });
+        setRawTasks(res.tasks);
+      } else {
+        const res = await api.listTasks({ sort: "due_date", limit: "500" });
+        setRawTasks(res.tasks);
+      }
+    } catch {
+      setRawTasks([]);
     }
   }, [api, nav]);
 
@@ -122,16 +129,48 @@ export default function App() {
         await refreshProjects();
         if (cancelled) return;
         await refreshTags();
-        if (!cancelled) setReady(true);
+        if (!cancelled) {
+          setBackendUnavailable(false);
+          setBackendNotice(null);
+        }
       } catch (e) {
         if (!cancelled) {
-          setBootError(e instanceof Error ? e.message : "Failed to start app");
+          setProjects([]);
+          setTags([]);
+          setRawTasks([]);
+          setBackendUnavailable(true);
+          setBackendNotice(e instanceof Error ? e.message : "Could not connect to TodoFlow.");
         }
+      } finally {
+        if (!cancelled) setReady(true);
       }
     })();
     return () => {
       cancelled = true;
     };
+  }, [api, refreshProjects, refreshTags]);
+
+  const retryConnection = useCallback(() => {
+    setBootError(null);
+    setBackendNotice(null);
+    setReady(false);
+    void (async () => {
+      try {
+        await api.ensureUser();
+        await refreshProjects();
+        await refreshTags();
+        setBackendUnavailable(false);
+        setBackendNotice(null);
+      } catch (e) {
+        setProjects([]);
+        setTags([]);
+        setRawTasks([]);
+        setBackendUnavailable(true);
+        setBackendNotice(e instanceof Error ? e.message : "Could not connect to TodoFlow.");
+      } finally {
+        setReady(true);
+      }
+    })();
   }, [api, refreshProjects, refreshTags]);
 
   useEffect(() => {
@@ -264,14 +303,10 @@ export default function App() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4 dark:bg-surface">
         <div className="max-w-md text-center">
-          {bootError ? (
-            <p className="text-red-600 dark:text-red-300">{bootError}</p>
-          ) : (
-            <div className="space-y-3">
-              <div className="mx-auto h-8 w-8 animate-pulse rounded-full bg-violet-500/40" />
-              <p className="text-sm text-zinc-500 dark:text-zinc-400">Connecting to TodoFlow…</p>
-            </div>
-          )}
+          <div className="space-y-3">
+            <div className="mx-auto h-8 w-8 animate-pulse rounded-full bg-violet-500/40" />
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">Connecting to TodoFlow…</p>
+          </div>
         </div>
       </div>
     );
@@ -285,9 +320,28 @@ export default function App() {
             Welcome to TodoFlow
           </h1>
           <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-            Create your first project to start adding tasks.
+            {backendUnavailable
+              ? "This static deployment has no backend — explore the UI below, or connect an API at /api to sync data."
+              : "Create your first project to start adding tasks."}
           </p>
         </div>
+        {backendUnavailable && (
+          <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-3 text-sm text-amber-950 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100">
+            <p className="font-medium">Offline / static preview</p>
+            <p className="mt-1 text-amber-900/90 dark:text-amber-200/95">
+              Expected TodoFlow API routes under{" "}
+              <code className="rounded bg-black/10 px-1 font-mono text-xs dark:bg-black/30">/api</code>
+              {backendNotice ? ` — ${backendNotice}` : "."}
+            </p>
+            <button
+              type="button"
+              className="mt-3 text-sm font-semibold text-violet-700 underline decoration-violet-500/50 hover:decoration-violet-600 dark:text-violet-300"
+              onClick={retryConnection}
+            >
+              Retry connection
+            </button>
+          </div>
+        )}
         {bootError && (
           <p className="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-700 dark:text-red-200">
             {bootError}
@@ -307,7 +361,7 @@ export default function App() {
           </label>
           <button
             type="submit"
-            disabled={creatingProject}
+            disabled={creatingProject || backendUnavailable}
             className="rounded-lg bg-violet-600 py-2 text-sm font-semibold text-white hover:bg-violet-500 disabled:opacity-50"
           >
             {creatingProject ? "Creating…" : "Create project"}

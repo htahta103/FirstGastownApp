@@ -20,6 +20,16 @@ async function parseError(res: Response): Promise<string> {
   }
 }
 
+/** Prevents infinite spinners when /api is missing (e.g. static hosting). */
+const DEFAULT_REQUEST_TIMEOUT_MS = 12_000;
+
+function isAbortError(err: unknown): boolean {
+  return (
+    (err instanceof DOMException && err.name === "AbortError") ||
+    (err instanceof Error && err.name === "AbortError")
+  );
+}
+
 export function createApi(userId: string) {
   const headers = {
     "Content-Type": "application/json",
@@ -27,17 +37,29 @@ export function createApi(userId: string) {
   };
 
   async function request<T>(path: string, init?: RequestInit): Promise<T> {
-    const res = await fetch(path, {
-      ...init,
-      headers: { ...headers, ...init?.headers },
-    });
-    if (!res.ok) {
-      throw new Error(await parseError(res));
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), DEFAULT_REQUEST_TIMEOUT_MS);
+    try {
+      const res = await fetch(path, {
+        ...init,
+        signal: controller.signal,
+        headers: { ...headers, ...init?.headers },
+      });
+      if (!res.ok) {
+        throw new Error(await parseError(res));
+      }
+      if (res.status === 204) {
+        return undefined as T;
+      }
+      return (await res.json()) as T;
+    } catch (err: unknown) {
+      if (isAbortError(err)) {
+        throw new Error("Request timed out — TodoFlow API is not available (static preview).");
+      }
+      throw err;
+    } finally {
+      window.clearTimeout(timeoutId);
     }
-    if (res.status === 204) {
-      return undefined as T;
-    }
-    return (await res.json()) as T;
   }
 
   return {
