@@ -13,6 +13,7 @@ import {
   type TaskListFilterState,
 } from '../../lib/taskFilterHelpers'
 import { Button, Input, Modal, Select, toast } from '../ui'
+import { useUIStore } from '../../stores/uiStore'
 
 const dueOptions: { value: DuePreset; label: string }[] = [
   { value: 'any', label: 'Any due date' },
@@ -62,6 +63,7 @@ export function FilterBar({
   /** Hide due + sort; calendar grid supplies the date range. */
   calendarMode?: boolean
 }) {
+  const setQuickAddProjectId = useUIStore((s) => s.setQuickAddProjectId)
   const qc = useQueryClient()
   const [saveOpen, setSaveOpen] = useState(false)
   const [saveName, setSaveName] = useState('')
@@ -169,7 +171,11 @@ export function FilterBar({
             label="Project"
             options={projectOptions}
             value={state.project_id}
-            onChange={(e) => onChange({ ...state, project_id: e.target.value })}
+            onChange={(e) => {
+              const v = e.target.value
+              onChange({ ...state, project_id: v })
+              setQuickAddProjectId(v || null)
+            }}
           />
           <Select
             label="Status"

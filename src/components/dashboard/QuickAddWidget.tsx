@@ -1,67 +1,20 @@
-import { useMemo, useState } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { createTask, deleteTask } from '../../api/client'
+import { useMemo } from 'react'
 import type { Project } from '../../types'
 import {
-  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  Input,
-  Select,
-  toast,
 } from '../ui'
+import { useUIStore } from '../../stores/uiStore'
+import { TaskCreateForm } from '../tasks/TaskCreateForm'
 
 export function QuickAddWidget({ projects }: { projects: Project[] }) {
-  const qc = useQueryClient()
-  const [title, setTitle] = useState('')
-  const [projectId, setProjectId] = useState('')
+  const preferredProjectId = useUIStore((s) => s.quickAddProjectId)
+  const setPreferredProjectId = useUIStore((s) => s.setQuickAddProjectId)
 
-  const resolvedProjectId = useMemo(() => {
-    if (projects.length === 0) return ''
-    if (projectId && projects.some((p) => p.id === projectId)) return projectId
-    return projects[0].id
-  }, [projects, projectId])
-
-  const mutation = useMutation({
-    mutationFn: () =>
-      createTask({
-        project_id: resolvedProjectId,
-        title: title.trim(),
-        status: 'todo',
-        priority: 'medium',
-      }),
-    onSuccess: (task) => {
-      setTitle('')
-      void qc.invalidateQueries({ queryKey: ['dashboard'] })
-      void qc.invalidateQueries({ queryKey: ['projects'] })
-      void qc.invalidateQueries({ queryKey: ['tasks'] })
-      toast({
-        message: 'Task created',
-        type: 'success',
-        undoLabel: 'Undo',
-        onUndo: () => {
-          deleteTask(task.id)
-            .then(() => {
-              void qc.invalidateQueries({ queryKey: ['dashboard'] })
-              void qc.invalidateQueries({ queryKey: ['projects'] })
-              void qc.invalidateQueries({ queryKey: ['tasks'] })
-            })
-            .catch((err: Error) => {
-              toast({ message: err.message, type: 'error' })
-            })
-        },
-      })
-    },
-    onError: (e: Error) => {
-      toast({ message: e.message, type: 'error' })
-    },
-  })
-
-  const options = projects.map((p) => ({ value: p.id, label: p.name }))
-  const canSubmit = title.trim().length > 0 && resolvedProjectId.length > 0 && !mutation.isPending
+  const defaultProjectId = useMemo(() => preferredProjectId ?? undefined, [preferredProjectId])
 
   return (
     <Card
@@ -78,33 +31,11 @@ export function QuickAddWidget({ projects }: { projects: Project[] }) {
             Create a project first — then you can add tasks here.
           </p>
         ) : (
-          <>
-            <Input
-              label="Title"
-              placeholder="What needs to be done?"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && canSubmit) mutation.mutate()
-              }}
-            />
-            <Select
-              label="Project"
-              options={options}
-              value={resolvedProjectId}
-              onChange={(e) => setProjectId(e.target.value)}
-            />
-            <Button
-              type="button"
-              variant="primary"
-              className="w-full sm:w-auto"
-              disabled={!canSubmit}
-              loading={mutation.isPending}
-              onClick={() => mutation.mutate()}
-            >
-              Add task
-            </Button>
-          </>
+          <TaskCreateForm
+            projects={projects}
+            defaults={{ projectId: defaultProjectId }}
+            onCreated={(t) => setPreferredProjectId(t.project_id)}
+          />
         )}
       </CardContent>
     </Card>

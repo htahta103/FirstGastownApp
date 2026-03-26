@@ -8,12 +8,14 @@ interface UIState {
   activeView: View
   sidebarOpen: boolean
   quickAddOpen: boolean
+  quickAddProjectId: string | null
   searchOpen: boolean
   toggleTheme: () => void
   setActiveView: (view: View) => void
   toggleSidebar: () => void
   setSidebarOpen: (open: boolean) => void
   setQuickAddOpen: (open: boolean) => void
+  setQuickAddProjectId: (projectId: string | null) => void
   setSearchOpen: (open: boolean) => void
 }
 
@@ -24,6 +26,7 @@ export const useUIStore = create<UIState>()(
       activeView: 'list',
       sidebarOpen: true,
       quickAddOpen: false,
+      quickAddProjectId: null,
       searchOpen: false,
       toggleTheme: () =>
         set((s) => ({ theme: s.theme === 'dark' ? 'light' : 'dark' })),
@@ -31,6 +34,7 @@ export const useUIStore = create<UIState>()(
       toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
       setSidebarOpen: (open) => set({ sidebarOpen: open }),
       setQuickAddOpen: (open) => set({ quickAddOpen: open }),
+      setQuickAddProjectId: (projectId) => set({ quickAddProjectId: projectId }),
       setSearchOpen: (open) => set({ searchOpen: open }),
     }),
     { name: 'todoflow-ui' }
