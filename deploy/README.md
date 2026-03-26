@@ -58,8 +58,8 @@ via `curl` and writes a local `STAGING.md` after successful health checks.
 Create a local-only env file (do not commit it):
 
 ```bash
-cp deploy/staging.env.example deploy/staging.env
-$EDITOR deploy/staging.env
+cp deploy/env.staging.example .env.staging
+$EDITOR .env.staging
 make deploy-staging
 ```
 

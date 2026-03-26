@@ -26,7 +26,10 @@ ROOT_PATH="${ROOT_PATH:-/}"
 
 STAGING_ENV_FILE="${STAGING_ENV_FILE:-}"
 if [[ -z "${STAGING_ENV_FILE}" ]]; then
-  for candidate in "${REPO_ROOT}/.env.staging" "${REPO_ROOT}/deploy/.env.staging"; do
+  for candidate in \
+    "${REPO_ROOT}/.env.staging" \
+    "${REPO_ROOT}/deploy/.env.staging" \
+    "${REPO_ROOT}/deploy/staging.env"; do
     if [[ -f "${candidate}" ]]; then
       STAGING_ENV_FILE="${candidate}"
       break
@@ -45,13 +48,13 @@ fi
 
 if [[ -z "${DEPLOY_HOST_STAGING}" ]]; then
   echo "error: set DEPLOY_HOST_STAGING" >&2
-  echo "hint: create .env.staging (or deploy/.env.staging) from deploy/env.staging.example" >&2
+  echo "hint: create .env.staging (or deploy/.env.staging or deploy/staging.env) from deploy/env.staging.example" >&2
   exit 1
 fi
 
 if [[ -z "${STAGING_URL}" ]]; then
   echo "error: set STAGING_URL (include scheme), e.g. https://staging.example.com" >&2
-  echo "hint: create .env.staging (or deploy/.env.staging) from deploy/env.staging.example" >&2
+  echo "hint: create .env.staging (or deploy/.env.staging or deploy/staging.env) from deploy/env.staging.example" >&2
   exit 1
 fi
 
