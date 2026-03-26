@@ -199,9 +199,13 @@ export function TaskBoardView({
         onError: (e: Error) => {
           toast({ message: e.message, type: 'error' })
           void qc.invalidateQueries({ queryKey: [...queryKey] })
+          // Calendar may be affected by status/priority filters, so refresh it too.
+          void qc.invalidateQueries({ queryKey: ['tasks', 'calendar'] })
         },
         onSettled: () => {
           void qc.invalidateQueries({ queryKey: ['dashboard'] })
+          // Calendar visibility depends on task fields and current filter range.
+          void qc.invalidateQueries({ queryKey: ['tasks', 'calendar'] })
         },
       },
     )

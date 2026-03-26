@@ -33,6 +33,9 @@ function TaskListRow({
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey })
       void qc.invalidateQueries({ queryKey: ['dashboard'] })
+      // Calendar visibility depends on task fields (status/priority/tags) and user filters,
+      // so ensure month/week views refresh after updates.
+      void qc.invalidateQueries({ queryKey: ['tasks', 'calendar'] })
     },
     onError: (e: Error) => toast({ message: e.message, type: 'error' }),
   })
