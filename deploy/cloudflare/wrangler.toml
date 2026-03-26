@@ -1,0 +1,12 @@
+name = "todoflow-api-staging"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
+account_id = "353a69adadf77371f073ef6bb0a66f4c"
+
+[vars]
+CORS_ORIGIN = "https://todoflow-staging.pages.dev"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "todoflow-staging"
+database_id = "7dc78c2d-4555-44a9-90ea-d4dbeb303014"

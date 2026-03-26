@@ -1,0 +1,17 @@
+{
+  "name": "todoflow-api-staging",
+  "private": true,
+  "scripts": {
+    "dev": "CLOUDFLARE_ACCOUNT_ID=353a69adadf77371f073ef6bb0a66f4c wrangler dev",
+    "deploy": "CLOUDFLARE_ACCOUNT_ID=353a69adadf77371f073ef6bb0a66f4c wrangler deploy",
+    "db:create": "CLOUDFLARE_ACCOUNT_ID=353a69adadf77371f073ef6bb0a66f4c wrangler d1 create todoflow-staging",
+    "db:migrate": "CLOUDFLARE_ACCOUNT_ID=353a69adadf77371f073ef6bb0a66f4c wrangler d1 execute todoflow-staging --file=schema.sql --remote"
+  },
+  "dependencies": {
+    "hono": "^4.0.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.0.0",
+    "wrangler": "^3.0.0"
+  }
+}
