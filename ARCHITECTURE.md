@@ -140,23 +140,13 @@ Standard codes: `NOT_FOUND`, `VALIDATION_ERROR`, `INTERNAL_ERROR`, `BAD_REQUEST`
 ## 5. Frontend Architecture
 
 ```
-src/
+web/src/
 ├── api/              # API client (fetch wrappers, typed responses)
-├── components/
-│   ├── ui/           # Reusable primitives (Button, Input, Card, Toast, Skeleton)
-│   ├── layout/       # Sidebar, TopBar, PageContainer
-│   ├── dashboard/    # DashboardStats, ProgressRing, ActivityFeed, DeadlineList
-│   ├── projects/     # ProjectCard, ProjectForm, ProjectList
-│   ├── tasks/        # TaskRow, TaskForm, TaskDetail, SubtaskList
-│   ├── views/        # ListView, BoardView, CalendarView, ViewSwitcher
-│   ├── search/       # SearchModal (Cmd+/), FilterBar, SavedFilterMenu
-│   └── quick-add/    # QuickAddModal (Cmd+K)
-├── hooks/            # useUser, useTasks, useProjects, useDashboard, useKeyboard
-├── stores/           # Zustand stores (uiStore: theme, activeView, sidebar)
-├── pages/            # Dashboard, ProjectDetail, TasksPage
+├── components/       # UI + feature components
+├── lib/              # helpers, constants, user-id management
+├── styles/           # global CSS (Tailwind entrypoint)
 ├── types/            # Shared TypeScript interfaces
-├── lib/              # date helpers, constants, user-id management
-└── App.tsx           # Router + providers + global layout
+└── App.tsx           # App shell (sidebar/topbar/views/modals)
 ```
 
 ### Key Patterns
