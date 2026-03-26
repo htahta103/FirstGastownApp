@@ -65,6 +65,7 @@ export default function App() {
   const [nav, setNav] = useState<NavMode>({ kind: "smart", filter: "today" });
   const [selected, setSelected] = useState<Task | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [quickAddOpen, setQuickAddOpen] = useState(false);
   const [creatingProject, setCreatingProject] = useState(false);
   const [newProjectName, setNewProjectName] = useState("Inbox");
 
@@ -87,6 +88,36 @@ export default function App() {
     document.documentElement.classList.toggle("dark", isDark);
     localStorage.setItem(THEME_KEY, isDark ? "dark" : "light");
   }, [isDark]);
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      const tag = target?.tagName?.toLowerCase();
+      const isTypingTarget =
+        tag === "input" ||
+        tag === "textarea" ||
+        Boolean((target as HTMLElement | null)?.isContentEditable);
+      if (isTypingTarget) return;
+
+      if (!(e.metaKey || e.ctrlKey)) return;
+
+      if (e.key === "/") {
+        e.preventDefault();
+        setSearchOpen((v) => !v);
+        setSearchQuery("");
+        return;
+      }
+
+      if (e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        if (backendUnavailable) return;
+        setQuickAddOpen((v) => !v);
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [backendUnavailable]);
 
   const defaultProjectId = nav.kind === "project" ? nav.projectId : (projects[0]?.id ?? "");
 
@@ -561,6 +592,53 @@ export default function App() {
       </div>
 
       <AnimatePresence>
+        {quickAddOpen && defaultProjectId && (
+          <motion.div
+            className="fixed inset-0 z-[65] flex items-start justify-center bg-black/40 p-4 pt-12 backdrop-blur-sm sm:pt-20"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setQuickAddOpen(false)}
+          >
+            <motion.div
+              role="dialog"
+              aria-label="Quick add task"
+              className="w-full max-w-2xl rounded-2xl border border-surface-border bg-white p-4 shadow-xl dark:bg-surface-raised sm:p-5"
+              initial={{ opacity: 0, y: -12, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -12, scale: 0.99 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="mb-4 flex items-start justify-between gap-2">
+                <div>
+                  <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Quick add</h2>
+                  <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">Cmd + K anytime</p>
+                </div>
+                <button
+                  type="button"
+                  className="rounded-lg px-2 py-1 text-sm text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/10"
+                  onClick={() => setQuickAddOpen(false)}
+                >
+                  Close
+                </button>
+              </div>
+
+              <TaskForm
+                api={api}
+                projects={projects}
+                tags={tags}
+                mode="create"
+                defaultProjectId={defaultProjectId}
+                onSaved={async (t) => {
+                  await refreshTasks();
+                  setSelected(t);
+                  setQuickAddOpen(false);
+                }}
+                onCancel={() => setQuickAddOpen(false)}
+              />
+            </motion.div>
+          </motion.div>
+        )}
         {searchOpen && (
           <motion.div
             className="fixed inset-0 z-[60] flex items-start justify-center bg-black/40 p-4 pt-20 backdrop-blur-sm"

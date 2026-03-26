@@ -43,6 +43,10 @@ npm run dev
 
 The web dev server proxies `/api` to `http://localhost:8080` (see `web/vite.config.ts`).
 
+## Frontend source of truth
+
+The **only** supported frontend is the Vite app under `web/`. CI, Docker, and staging builds deploy `web/dist`.
+
 ### Production-style stack (Nginx + API + Postgres)
 
 Split images: API only (`deploy/docker/Dockerfile.api`), Nginx with built SPA + `/api` reverse proxy (`deploy/docker/Dockerfile.nginx`), Postgres 16 with `deploy/postgres/postgresql.conf`. Network: **`todoflow_prod`**.
