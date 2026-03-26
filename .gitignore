@@ -5,6 +5,7 @@ deploy/.env.staging
 deploy/staging.env
 
 .runtime/
+.wrangler/
 .claude/
 .cursor/
 .beads/
